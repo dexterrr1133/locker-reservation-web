@@ -1,9 +1,11 @@
 import Header from "@/components/header"
 
-const Home = () => {
+export default function HomeDashboard() {
   return (
-      <span>Home Page</span>
+    
+    <div className="">
+      <Header />
+        <h1>HOMEESASDFAsdfasdf</h1>
+    </div>
   );
-};
-
-export default Home;
+}

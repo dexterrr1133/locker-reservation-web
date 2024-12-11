@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -7,9 +8,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-export function SignupForm() {
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+interface SignupFormProps{
+  onSignup: (email: string, password: string) => Promise<void>;
+  loading: boolean;
+  error: string;
+}
+
+
+export function SignupForm({ onSignup, loading, error }: SignupFormProps) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSignup(email, password);
+  };
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
@@ -19,6 +35,7 @@ export function SignupForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <form onSubmit={handleSubmit}>
         <div className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
@@ -26,6 +43,8 @@ export function SignupForm() {
               id="email"
               type="email"
               placeholder="m@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -36,21 +55,25 @@ export function SignupForm() {
                 Forgot your password?
               </Link>
             </div>
-            <Input id="password" type="password" required />
+            <Input id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required />
           </div>
-          <Button type="submit" className="w-full">
-            Login
-          </Button>
-          <Button variant="outline" className="w-full">
-            Login with Google
-          </Button>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing Up..." : "Signup"}
+            </Button>
         </div>
         <div className="mt-4 text-center text-sm">
-          Don&apos;t have an account?{" "}
-          <Link href="#" className="underline">
-            Sign up
+          Have an account?{" "}
+          <Link href="/login" className="underline">
+            Sign in
           </Link>
         </div>
+        </form>
+        
       </CardContent>
     </Card>
   )
