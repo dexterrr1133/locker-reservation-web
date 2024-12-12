@@ -18,7 +18,7 @@ const Signup = () => {
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      router.push("/admin"); // Redirect after successful signup
+      router.push("/"); // Redirect after successful signup
     } catch (err: any) {
       setError(err.message || "An error occurred. Please try again.");
     } finally {

@@ -5,8 +5,8 @@ import dynamic from 'next/dynamic'
 import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
+import Image from 'next/image';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
-import { LARGE_LOCKER_ROUTE, MEDIUM_LOCKER_ROUTE, SMALL_LOCKER_ROUTE } from '@/app/constants/routes'
 
 const Dialog = dynamic(() => import('@headlessui/react').then((mod) => mod.Dialog), { ssr: false })
 const DialogPanel = dynamic(() => import('@headlessui/react').then((mod) => mod.DialogPanel), { ssr: false })
@@ -18,7 +18,7 @@ const PopoverPanel = dynamic(() => import('@headlessui/react').then((mod) => mod
 const lockers = [
   { name: 'Small Lockers', description: 'Get a better understanding of your traffic', href: "/small_lockers", icon: ChevronDownIcon },
   { name: 'Medium Lockers', description: 'Speak directly to your customers', href: "/medium_lockers", icon: ChevronDownIcon },
-  { name: 'Large Lockers', description: 'Your customers’ data will be safe and secure', href: "/large_lockers", icon: ChevronDownIcon },
+  { name: 'Tall Lockers', description: 'Your customers’ data will be safe and secure', href: "/tall_lockers", icon: ChevronDownIcon },
 ]
 
 const callsToAction = [
@@ -35,9 +35,11 @@ export default function Header() {
         <div className="flex lg:flex-1">
           <Link href="/" className="-m-1.5 p-1.5">
             <span className="sr-only">Your Company</span>
-            <img
-              alt="Your Company"
-              src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
+            <Image
+              src="/locker_icon.png"
+              alt="Locker Icon"
+              width={320}
+              height={320}
               className="h-8 w-auto"
             />
           </Link>
@@ -100,11 +102,11 @@ export default function Header() {
           <Link href="/admin" className="text-sm/6 font-semibold text-gray-900">
             Admin Dashboard
           </Link>
-          <Link href="#" className="text-sm/6 font-semibold text-gray-900">
-            Marketplace
+          <Link href="/reserve_locker" className="text-sm/6 font-semibold text-gray-900">
+            Reservation
           </Link>
           <Link href="#" className="text-sm/6 font-semibold text-gray-900">
-            Company
+            FAQ'S
           </Link>
         </PopoverGroup>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end pr-5">

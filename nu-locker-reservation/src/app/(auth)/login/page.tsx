@@ -32,8 +32,8 @@ const Login = () => {
     <div className="flex h-screen w-full items-center justify-center px-4">
       <LoginForm onLogin={handleLogin} loading={loading} error={error} />
       <div className="absolute right-6 bottom-5">
-                <ModeToggle />
-            </div>
+        <ModeToggle />
+      </div>
     </div>
   )
 };

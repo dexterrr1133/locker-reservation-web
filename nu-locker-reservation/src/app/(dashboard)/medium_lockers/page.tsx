@@ -1,9 +1,10 @@
+import MediumLockers from '@/components/lockers/medium_locker_list';
 import ProtectedRoutes from '@/components/protectedRoutes';
 
 const Medium_Locker = () => {
   return (
     <ProtectedRoutes>
-      <h1>Medium Locker Page</h1>
+      <MediumLockers />
     </ProtectedRoutes>
   );
 };
