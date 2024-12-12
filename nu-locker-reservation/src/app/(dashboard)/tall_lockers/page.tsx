@@ -1,9 +1,10 @@
+import TallLockers from '@/components/lockers/tall_locker_list';
 import ProtectedRoutes from '@/components/protectedRoutes';
 
 const Large_Locker = () => {
   return (
     <ProtectedRoutes>
-      <h1>Large Locker Page</h1>
+      <TallLockers />
     </ProtectedRoutes>
   );
 };
