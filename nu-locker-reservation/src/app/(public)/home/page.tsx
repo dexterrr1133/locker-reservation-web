@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
-import Header from "@/components/header"
+import { useState, useEffect } from 'react';
+import Header from "@/components/features/header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/services/firebase';
-import { ModeToggle } from "@/components/toggle-light-dark-mode";
+import { ModeToggle } from "@/components/features/toggle-light-dark-mode";
 
 export default function HomeDashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -23,8 +23,6 @@ export default function HomeDashboard() {
     // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
-
-    
 
   const lockerTypes = [
     {
@@ -62,7 +60,7 @@ export default function HomeDashboard() {
   }
 
   return (
-    <div className="min-h-screen p-12 relative">
+    <div className="min-h-screen relative">
       <Header />
       
       {/* User Info Section */}
@@ -70,33 +68,33 @@ export default function HomeDashboard() {
         <div className="text-center mb-6">
           {/* Display user info if logged in, otherwise prompt to log in */}
           {user ? (
-            <h2 className="text-xl font-semibold text-gray-800">Welcome, {user.email}</h2>
+            <h2 className="text-xl font-semibold pt-10">Welcome, {user.email}</h2>
           ) : (
-            <div className="text-xl text-gray-600">
+            <div className="text-xl pt-10">
               <p>Please <a href="/login" className="text-blue-500">log in</a> to access more features.</p>
             </div>
           )}
         </div>
         
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-5xl font-bold text-gray-800">Secure Your Storage Needs with Locker</h1>
+          <h1 className="text-5xl font-bold">Secure Your Storage Needs with Locker</h1>
         </div>
         
-        <p className="text-gray-600 text-xl mb-10">Find the perfect storage solution tailored to your needs</p>
+        <p className="text-xl mb-10">Find the perfect storage solution tailored to your needs</p>
         
         <div className="grid md:grid-cols-3 gap-8">
           {lockerTypes.map((locker, index) => (
             <Card 
               key={index}
-              className="rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group overflow-hidden"
+              className="max-w-sm rounded-lg shadow-md p-6 transition ease-in-out hover:-translate-y-1 hover:scale-110 duration-300"
               onClick={() => router.push(locker.route)}
             >
               <CardHeader className="p-6 pb-0">
-                <CardTitle className="text-xl font-semibold text-gray-800">
+                <CardTitle className="text-xl font-semibold">
                   {locker.title}
                 </CardTitle>
                 <CardDescription className="flex justify-between items-center mt-2">
-                  <span className="text-gray-600">{locker.size}</span>
+                  <span className="">{locker.size}</span>
                   <span className="font-bold text-green-600">{locker.price}</span>
                 </CardDescription>
               </CardHeader>
@@ -106,7 +104,6 @@ export default function HomeDashboard() {
                     src={locker.imagePlaceholder} 
                     alt={`${locker.title} visualization`}
                     fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-300"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </div>

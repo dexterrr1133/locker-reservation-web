@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, documentId, getDoc } from "firebase/firestore";
 import { db } from "@/services/firebase";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
-import Header from "@/components/header";
+import Header from "@/components/features/header";
 
 export default function UserPage() {
   const router = useRouter();

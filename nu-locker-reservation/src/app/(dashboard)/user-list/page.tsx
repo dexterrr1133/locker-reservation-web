@@ -1,6 +1,7 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import { Chart } from "@/components/chart"
-import { ModeToggle } from "@/components/toggle-light-dark-mode"
+import { AppSidebar } from "@/components/features/app-sidebar"
+import { Chart } from "@/components/features/chart"
+import { ModeToggle } from "@/components/features/toggle-light-dark-mode"
+import Transactions from "@/components/features/transactions"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -39,10 +40,7 @@ export default function Page() {
           </Breadcrumb>
         </header>
         {/*This is for the main dashboard using card components */}
-          <h1>
-            Page Visits
-          </h1>
-        <Chart />
+        <Transactions />
         <div className="absolute right-6 bottom-5">
         <ModeToggle />
         </div>

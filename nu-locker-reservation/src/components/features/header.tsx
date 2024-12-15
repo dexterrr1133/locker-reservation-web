@@ -84,13 +84,13 @@ const Header = () => {
 
         {/* Lockers Dropdown for Desktop */}
         <div className="hidden lg:flex lg:gap-x-12">
-          <Link href="/admin" className="text-sm font-semibold text-gray-900">
+          <Link href="/page_visit_admin" className="text-sm font-semibold text-gray-900">
             Admin Dashboard
           </Link>
           <Link href="/reserve_locker" className="text-sm font-semibold text-gray-900">
             Reservation
           </Link>
-          <Link href="#" className="text-sm font-semibold text-gray-900">
+          <Link href="/FAQ" className="text-sm font-semibold text-gray-900">
             FAQ'S
           </Link>
         </div>
@@ -100,7 +100,7 @@ const Header = () => {
           {currentUser ? (
             <>
               <span className="text-sm font-semibold text-gray-900 pr-4">
-                Welcome, {currentUser.email}
+                {currentUser.email}
               </span>
               <button
                 onClick={handleSignOut}
@@ -139,7 +139,7 @@ const Header = () => {
             {currentUser ? (
               <>
                 <span className="text-sm font-semibold text-gray-900 pr-4">
-                  Welcome, {currentUser.email}
+                  {currentUser.email}
                 </span>
                 <button
                   onClick={handleSignOut}

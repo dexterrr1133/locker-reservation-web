@@ -15,10 +15,15 @@ const firebaseConfig = {
   measurementId: "G-27RPTSSR3C",
 };
 
-
-const app =  !getApps().length ? initializeApp(firebaseConfig) : getApp()
-const analytics = getAnalytics(app);
+export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+let analytics;
+if (typeof window !== "undefined") {
+  analytics = getAnalytics(app);
+}
+
+export { analytics };
 
 
