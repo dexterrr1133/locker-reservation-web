@@ -109,7 +109,23 @@ const Header = () => {
           {currentUser ? (
             <>
               <DropdownMenu>
-              <DropdownMenuTrigger>Icon</DropdownMenuTrigger>
+              <DropdownMenuTrigger>
+              <div className="h-10 flex items-center justify-center ">
+              <Avatar
+                className="w-full h-full rounded-full overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none active:outline-none active:ring-0"
+              >
+                <AvatarImage
+                  src="https://github.com/shadcn.png"
+                  className="w-full h-full object-cover"
+                />
+                <AvatarFallback
+                  className="flex items-center justify-center bg-gray-300 text-black text-lg font-semibold focus:outline-none focus:ring-0 focus-visible:outline-none active:outline-none active:ring-0"
+                >
+                  CN
+                </AvatarFallback>
+              </Avatar>
+              </div>
+              </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuLabel>
                 <span className="text-sm font-semibold text-gray-900 pr-4">
