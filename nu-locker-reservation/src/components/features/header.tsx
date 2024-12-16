@@ -9,6 +9,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const lockers = [
   { name: 'Small Lockers', description: 'Get a better understanding of your traffic', href: "/small_lockers", icon: ChevronDownIcon },
@@ -99,15 +108,27 @@ const Header = () => {
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
           {currentUser ? (
             <>
-              <span className="text-sm font-semibold text-gray-900 pr-4">
-                {currentUser.email}
-              </span>
-              <button
-                onClick={handleSignOut}
-                className="text-sm font-semibold text-gray-900"
-              >
-                Sign Out
-              </button>
+              <DropdownMenu>
+              <DropdownMenuTrigger>Icon</DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>
+                <span className="text-sm font-semibold text-gray-900 pr-4">
+                  {currentUser.email}
+                </span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push('/profile')}>
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                <button
+                  onClick={handleSignOut}
+                >
+                  Sign Out
+                </button>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             </>
           ) : (
             <>
@@ -121,6 +142,8 @@ const Header = () => {
           )}
         </div>
       </nav>
+
+      
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
