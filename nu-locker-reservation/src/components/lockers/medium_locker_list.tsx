@@ -19,12 +19,14 @@ interface LockerOwner {
   email: string;
   startDate: string;
   endDate: string;
+  size: string;
 }
 
 interface LockerData {
   id: string;
   color: string;
   owner?: LockerOwner | null;
+  size: string;
 }
 
 interface FirestoreLockerData {
@@ -67,12 +69,13 @@ const MediumLockers: FC = () => {
       const initialLockers = Array(config.rows).fill(null).map((_, rowIndex) =>
         Array(config.cols).fill(null).map((_, colIndex) => ({
           color: '#ffffff',
-          id: `Medium-${rowIndex}-${colIndex}`
+          id: `Medium-${rowIndex}-${colIndex}`,
+          size: 'Medium'
         }))
       );
 
       try {
-        const lockersCollection = collection(db, 'lockers');
+        const lockersCollection = collection(db, 'reservations');
         const lockersSnapshot = await getDocs(lockersCollection);
 
         lockersSnapshot.forEach((doc) => {
@@ -99,7 +102,7 @@ const MediumLockers: FC = () => {
   useEffect(() => {
     const checkUserReservation = async (email: string) => {
       try {
-        const q = query(collection(db, 'lockers'), where('owner.email', '==', email));
+        const q = query(collection(db, 'reservations'), where('owner.email', '==', email));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
           setUserHasReservedLocker(true); // User has already reserved a locker
@@ -122,7 +125,7 @@ const MediumLockers: FC = () => {
     const lockerId = `Medium-${rowIndex}-${colIndex}`;
 
     try {
-      const lockerRef = doc(db, 'lockers', lockerId);
+      const lockerRef = doc(db, 'reservations', lockerId);
       await setDoc(lockerRef, {
         owner: ownerData
       }, { merge: true });
@@ -155,7 +158,8 @@ const MediumLockers: FC = () => {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       startDate: formData.get('startDate') as string,
-      endDate: formData.get('endDate') as string
+      endDate: formData.get('endDate') as string,
+      size: "Medium" as string
     };
 
     const [row, col] = selectedLocker.id.split('-').slice(1).map(Number);

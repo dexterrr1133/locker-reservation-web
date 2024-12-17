@@ -20,6 +20,7 @@ const TallLockers: FC<LockerProps> = ({ className = '' }) => {
     email: string;
     startDate: string;
     endDate: string;
+    size: string;
   }
   
   interface LockerData {
@@ -66,7 +67,7 @@ const TallLockers: FC<LockerProps> = ({ className = '' }) => {
       );
 
       try {
-        const lockersCollection = collection(db, 'tall-locker');
+        const lockersCollection = collection(db, 'reservations');
         const lockersSnapshot = await getDocs(lockersCollection);
 
         lockersSnapshot.forEach((doc) => {
@@ -93,7 +94,7 @@ const TallLockers: FC<LockerProps> = ({ className = '' }) => {
   useEffect(() => {
     const checkUserReservation = async (email: string) => {
       try {
-        const q = query(collection(db, 'tall-locker'), where('owner.email', '==', email));
+        const q = query(collection(db, 'reservations'), where('owner.email', '==', email));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
           setUserHasReservedLocker(true); // User has already reserved a locker
@@ -116,7 +117,7 @@ const TallLockers: FC<LockerProps> = ({ className = '' }) => {
     const lockerId = `Tall-${rowIndex}-${colIndex}`;
 
     try {
-      const lockerRef = doc(db, 'tall-locker', lockerId);
+      const lockerRef = doc(db, 'reservations', lockerId);
       await setDoc(lockerRef, {
         owner: ownerData
       }, { merge: true });
@@ -149,7 +150,8 @@ const TallLockers: FC<LockerProps> = ({ className = '' }) => {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       startDate: formData.get('startDate') as string,
-      endDate: formData.get('endDate') as string
+      endDate: formData.get('endDate') as string,
+      size: "Tall" as string
     };
 
     const [row, col] = selectedLocker.id.split('-').slice(1).map(Number);

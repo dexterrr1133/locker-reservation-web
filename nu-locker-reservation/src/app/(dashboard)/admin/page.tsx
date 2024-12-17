@@ -1,4 +1,7 @@
+"use client";
 
+import { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
 import { Chart } from "@/components/features/chart"
 import { AppSidebar } from "@/components/features/app-sidebar"
 import { 
@@ -32,15 +35,48 @@ import {
   } from "@/components/ui/table"
   import { Button } from "@/components/ui/button"
   import { Input } from "@/components/ui/input"
+  import { db } from "@/services/firebase"
+
+  type LockerStats = {
+    total: number;
+    available: number;
+    inUse: number;
+    maintenance: number;
+  };
 
 export default function Page() {
     // Sample data structures (would typically come from backend)
-    const lockerStats = {
-      total: 100,
-      available: 65,
-      inUse: 35,
-      maintenance: 5
-    }
+    const [lockerStats, setLockerStats] = useState<LockerStats>({
+      total: 0,
+      available: 0,
+      inUse: 0,
+      maintenance: 0,
+    });
+    useEffect(() => {
+      const fetchLockers = async () => {
+        try {
+          const querySnapshot = await getDocs(collection(db, "locker"));
+          let total = 0,
+            available = 0,
+            inUse = 0,
+            maintenance = 0;
+  
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            total++;
+            if (data.status === "available") available++;
+            if (data.status === "in-use") inUse++;
+            if (data.status === "maintenance") maintenance++;
+          });
+  
+          setLockerStats({ total, available, inUse, maintenance });
+        } catch (error) {
+          console.error("Error fetching lockers:", error);
+        }
+      };
+  
+      fetchLockers();
+    }, []);
   
     const recentReservations = [
       { id: 1, user: 'John Doe', locker: 'A-12', startDate: '2024-03-15', endDate: '2024-03-22' },
@@ -141,7 +177,7 @@ export default function Page() {
         </SidebarInset>
       </SidebarProvider>
     )
-  }
+  };
   
   // Placeholder chart component (you'd replace with actual chart implementation)
   function LockerChart() {
@@ -155,3 +191,4 @@ export default function Page() {
       </Card>
     )
   }
+

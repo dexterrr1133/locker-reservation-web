@@ -7,7 +7,7 @@ const Medium_Locker = () => {
   return (
     <ProtectedRoutes>
       <Header />
-      <MediumLockersPage />
+      <MediumLockers />
     </ProtectedRoutes>
   );
 };
