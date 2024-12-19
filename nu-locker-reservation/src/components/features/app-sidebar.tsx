@@ -1,7 +1,14 @@
+'use client'
+
 import * as React from "react";
 
 import { SearchForm } from "@/components/features/search-form";
 import { VersionSwitcher } from "@/components/features/version-switcher";
+import { NavUser } from "@/components/ui/nav-user"
+import { useState, useEffect } from 'react';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from '@/services/firebase';
+import { useRouter } from 'next/navigation';
 
 import {
   Sidebar,
@@ -14,10 +21,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarFooter
 } from "@/components/ui/sidebar";
 
 // This is sample data.
 const data = {
+ 
   versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
   navMain: [
     {
@@ -50,6 +59,14 @@ const data = {
 };
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+  const router = useRouter();
+
+
+
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -69,14 +86,21 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuItem key={childItem.title}>
                     <SidebarMenuButton asChild>
                       <a href={childItem.url}>{childItem.title}</a>
+                      
+                      
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
+            
           </SidebarGroup>
         ))}
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser/>
+       
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

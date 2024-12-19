@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { auth } from '@/services/firebase';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import {
   DropdownMenu,
@@ -19,10 +18,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+
 const lockers = [
   { name: 'Small Lockers', description: 'Get a better understanding of your traffic', href: "/small_lockers", icon: ChevronDownIcon },
   { name: 'Medium Lockers', description: 'Speak directly to your customers', href: "/medium_lockers", icon: ChevronDownIcon },
-  { name: 'Tall Lockers', description: 'Your customers’ data will be safe and secure', href: "/tall_lockers", icon: ChevronDownIcon },
+  { name: 'Tall Lockers', description: 'Your customers data will be safe and secure', href: "/tall_lockers", icon: ChevronDownIcon },
 ];
 
 const callsToAction = [
@@ -30,38 +30,55 @@ const callsToAction = [
   { name: 'Contact sales', href: '#', icon: PhoneIcon },
 ];
 
-
 const Header = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const router = useRouter();
 
-  // Listen to user authentication state
+  // Check for session on component mount
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setCurrentUser(user);
-      } else {
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/check-session');
+        const data = await response.json();
+        
+        if (data.user) {
+          setCurrentUser(data.user);
+        } else {
+          setCurrentUser(null);
+        }
+      } catch (error) {
+        console.error('Session check failed:', error);
         setCurrentUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false); // Stop loading when authentication state is resolved
-    });
+    };
 
-    // Cleanup the listener when the component unmounts
-    return () => unsubscribe();
+    checkSession();
   }, []);
 
   // Handle sign-out
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
-      setCurrentUser(null); // Update state immediately after sign-out
-      router.push('/home'); // Redirect to /home after sign-out
+      // Use the server action for logout
+  
+      
+      // Reset local state
+      setCurrentUser(null);
+      
+      // Redirect to login page
+      router.push('/login');
     } catch (err: any) {
       console.error('Error during sign-out:', err.message);
     }
   };
+
+  // Render loading state if needed
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <header className="bg-white">
@@ -121,7 +138,7 @@ const Header = () => {
                 <AvatarFallback
                   className="flex items-center justify-center bg-gray-300 text-black text-lg font-semibold focus:outline-none focus:ring-0 focus-visible:outline-none active:outline-none active:ring-0"
                 >
-                  CN
+                  {currentUser.displayName ? currentUser.displayName.charAt(0).toUpperCase() : 'CN'}
                 </AvatarFallback>
               </Avatar>
               </div>
@@ -158,8 +175,6 @@ const Header = () => {
           )}
         </div>
       </nav>
-
-      
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
