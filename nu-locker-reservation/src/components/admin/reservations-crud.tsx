@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
-import { toast } from "@/components/ui/use-toast"
+import { Toast } from "@/components/ui/toast"
 import { MoreVertical, Plus } from "lucide-react"
 
 export default function ReservationsCRUD() {
@@ -71,9 +71,8 @@ export default function ReservationsCRUD() {
       setReservations(data)
       setIsLoading(false)
     } catch (error) {
-      toast({
+      Toast({
         title: "Error",
-        description: "Failed to fetch reservations",
         variant: "destructive",
       })
     }
@@ -84,24 +83,24 @@ export default function ReservationsCRUD() {
     try {
       if (editingReservation) {
         await updateReservation(editingReservation.id!, formData)
-        toast({
+        Toast({
           title: "Success",
-          description: "Reservation updated successfully",
+          
         })
       } else {
         await createReservation(formData)
-        toast({
+        Toast({
           title: "Success",
-          description: "Reservation created successfully",
+          
         })
       }
       setIsOpen(false)
       setEditingReservation(null)
       fetchReservations()
     } catch (error) {
-      toast({
+      Toast({
         title: "Error",
-        description: "Failed to save reservation",
+        
         variant: "destructive",
       })
     }
@@ -125,15 +124,14 @@ export default function ReservationsCRUD() {
   const handleDelete = async (id: string) => {
     try {
       await deleteReservation(id)
-      toast({
+      Toast({
         title: "Success",
-        description: "Reservation deleted successfully",
+        
       })
       fetchReservations()
     } catch (error) {
-      toast({
+      Toast({
         title: "Error",
-        description: "Failed to delete reservation",
         variant: "destructive",
       })
     }
@@ -202,14 +200,15 @@ export default function ReservationsCRUD() {
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label className="text-right">Dates</Label>
                   <div className="col-span-3 flex gap-4">
+                    
                     <Calendar
                       selected={formData.startDate}
-                      onSelect={(date) => date && setFormData({ ...formData, startDate: date })}
+                      onSelect={(date: Date | undefined) => date && setFormData({ ...formData, startDate: date })}
                       className="rounded-md border"
                     />
                     <Calendar
                       selected={formData.endDate}
-                      onSelect={(date) => date && setFormData({ ...formData, endDate: date })}
+                      onSelect={(date: Date | undefined) => date && setFormData({ ...formData, endDate: date })}
                       className="rounded-md border"
                     />
                   </div>

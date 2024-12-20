@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { AppSidebar } from "@/components/features/app-sidebar";
 import Nav from "@/components/features/admin_navbar";
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { Toaster } from "@/components/ui/toaster";
 
 
   
@@ -18,6 +19,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
           <Nav />
           {/* page main content */}
           {children}
+          <Toaster />
           {/* page main content ends */}
         </SidebarInset>
       </SidebarProvider>
