@@ -1,0 +1,103 @@
+{
+  "documents": [
+    {
+      "name": "projects/locker-reservation-nu/databases/(default)/documents/locker/locker1",
+      "fields": {
+        "id": { "stringValue": "locker1" },
+        "name": { "stringValue": "Small Locker 1" },
+        "status": { "stringValue": "available" },
+        "size": { "stringValue": "small" },
+        "lastReservedAt": { "nullValue": null },
+        "reservedBy": { "nullValue": null }
+      }
+    },
+    {
+      "name": "projects/locker-reservation-nu/databases/(default)/documents/locker/locker2",
+      "fields": {
+        "id": { "stringValue": "locker2" },
+        "name": { "stringValue": "Small Locker 2" },
+        "status": { "stringValue": "maintenance" },
+        "size": { "stringValue": "small" },
+        "lastReservedAt": { "nullValue": null },
+        "reservedBy": { "nullValue": null }
+      }
+    },
+    {
+      "name": "projects/locker-reservation-nu/databases/(default)/documents/locker/locker3",
+      "fields": {
+        "id": { "stringValue": "locker3" },
+        "name": { "stringValue": "Small Locker 3" },
+        "status": { "stringValue": "in-use" },
+        "size": { "stringValue": "small" },
+        "lastReservedAt": { "timestampValue": "2024-12-16T14:30:00Z" },
+        "reservedBy": { "stringValue": "user123" }
+      }
+    },
+    {
+      "name": "projects/locker-reservation-nu/databases/(default)/documents/locker/locker4",
+      "fields": {
+        "id": { "stringValue": "locker4" },
+        "name": { "stringValue": "Medium Locker 1" },
+        "status": { "stringValue": "available" },
+        "size": { "stringValue": "medium" },
+        "lastReservedAt": { "nullValue": null },
+        "reservedBy": { "nullValue": null }
+      }
+    },
+    {
+      "name": "projects/locker-reservation-nu/databases/(default)/documents/locker/locker5",
+      "fields": {
+        "id": { "stringValue": "locker5" },
+        "name": { "stringValue": "Medium Locker 2" },
+        "status": { "stringValue": "maintenance" },
+        "size": { "stringValue": "medium" },
+        "lastReservedAt": { "nullValue": null },
+        "reservedBy": { "nullValue": null }
+      }
+    },
+    {
+      "name": "projects/locker-reservation-nu/databases/(default)/documents/locker/locker6",
+      "fields": {
+        "id": { "stringValue": "locker6" },
+        "name": { "stringValue": "Medium Locker 3" },
+        "status": { "stringValue": "in-use" },
+        "size": { "stringValue": "medium" },
+        "lastReservedAt": { "timestampValue": "2024-12-15T11:00:00Z" },
+        "reservedBy": { "stringValue": "user456" }
+      }
+    },
+    {
+      "name": "projects/locker-reservation-nu/databases/(default)/documents/locker/locker7",
+      "fields": {
+        "id": { "stringValue": "locker7" },
+        "name": { "stringValue": "Large Locker 1" },
+        "status": { "stringValue": "available" },
+        "size": { "stringValue": "large" },
+        "lastReservedAt": { "nullValue": null },
+        "reservedBy": { "nullValue": null }
+      }
+    },
+    {
+      "name": "projects/locker-reservation-nu/databases/(default)/documents/locker/locker8",
+      "fields": {
+        "id": { "stringValue": "locker8" },
+        "name": { "stringValue": "Large Locker 2" },
+        "status": { "stringValue": "maintenance" },
+        "size": { "stringValue": "large" },
+        "lastReservedAt": { "nullValue": null },
+        "reservedBy": { "nullValue": null }
+      }
+    },
+    {
+      "name": "projects/locker-reservation-nu/databases/(default)/documents/locker/locker9",
+      "fields": {
+        "id": { "stringValue": "locker9" },
+        "name": { "stringValue": "Large Locker 3" },
+        "status": { "stringValue": "in-use" },
+        "size": { "stringValue": "large" },
+        "lastReservedAt": { "timestampValue": "2024-12-14T09:15:00Z" },
+        "reservedBy": { "stringValue": "user789" }
+      }
+    }
+  ]
+}

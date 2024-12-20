@@ -1,7 +1,8 @@
 import * as React from "react";
 
-import { SearchForm } from "@/components/search-form";
-import { VersionSwitcher } from "@/components/version-switcher";
+import { SearchForm } from "@/components/features/search-form";
+import { VersionSwitcher } from "@/components/features/version-switcher";
+
 import {
   Sidebar,
   SidebarContent,
@@ -24,12 +25,24 @@ const data = {
       url: "#",
       items: [
         {
-          title: "Page View",
-          url: "#",
+          title: 'Dashboard',
+          url: '/admin',
+         
         },
         {
-          title: "Project Structure",
-          url: "#",
+          title: "List of Users",
+          url: "/user-list",
+          
+        },
+        {
+          title: 'Lockers',
+          url: '/admin/lockers',
+          
+        },
+        {
+          title: 'Reservations',
+          url: '/admin/reserve_locker',
+         
         },
       ],
     },
