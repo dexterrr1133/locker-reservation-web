@@ -8,6 +8,7 @@ import Image from "next/image";
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/services/firebase';
 import { ModeToggle } from "@/components/features/toggle-light-dark-mode";
+import Spline from '@splinetool/react-spline';
 
 export default function HomeDashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -31,7 +32,7 @@ export default function HomeDashboard() {
       price: "$500 per AY",
       route: "/small_lockers",
       description: "Ideal for compact storage needs",
-      imagePlaceholder: "/small-locker.jpg"
+      imagePlaceholder: "/img/locker_small.png"
     },
     {
       title: "Medium Locker",
@@ -39,7 +40,7 @@ export default function HomeDashboard() {
       price: "$800 per AY",
       route: "/medium_lockers",
       description: "Perfect for standard storage requirements",
-      imagePlaceholder: "/medium-locker.jpg"
+      imagePlaceholder: "/img/locker_medium.png"
     },
     {
       title: "Tall Locker",
@@ -47,7 +48,7 @@ export default function HomeDashboard() {
       price: "$1200 per AY",
       route: "/tall_lockers",
       description: "Spacious solution for extensive storage",
-      imagePlaceholder: "/tall-locker.jpg"
+      imagePlaceholder: "/img/locker_large.png"
     }
   ];
 
@@ -99,19 +100,25 @@ export default function HomeDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6 pt-4">
-                <div className="relative w-full aspect-video overflow-hidden rounded-lg">
-                  <Image 
-                    src={locker.imagePlaceholder} 
-                    alt={`${locker.title} visualization`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </div>
+              <div className="relative w-full aspect-[9/16] overflow-hidden rounded-lg">
+              <Image
+                src={locker.imagePlaceholder}
+                alt={`${locker.title} visualization`}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            </div>
+
               </CardContent>
             </Card>
           ))}
         </div>
       </div>
+
+      <div>
+          <Spline scene="https://prod.spline.design/VmMUbymeSixicqGl/scene.splinecode"></Spline>
+        </div>
+
     </div>
   );
 }
