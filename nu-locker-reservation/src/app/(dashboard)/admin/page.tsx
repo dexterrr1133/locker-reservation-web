@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { Chart } from "@/components/features/chart"
-import { AppSidebar } from "@/components/features/app-sidebar"
+import { AppSidebar } from "@/components/features/admin-app-sidebar"
 import { 
     Card, 
     CardContent, 
