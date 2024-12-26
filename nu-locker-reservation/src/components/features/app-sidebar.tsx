@@ -36,12 +36,15 @@ const data = {
       items: []
     },
     {
+      title: 'Users',
+      url: '/admin/users',
+      items: []
+    },
+    {
       title: 'Lockers',
-      items: [
-        { title: 'Small Lockers', url: '/admin/lockers/small-lockers' },
-        { title: 'Medium Lockers', url: '/admin/lockers/medium-lockers' },
-        { title: 'Large Lockers', url: '/admin/lockers/large-lockers' },
-      ],
+      url: '/admin/lockers',
+      items: []
+    
     },
     {
       title: 'Reservations',
@@ -109,20 +112,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                           }`}
                         />
                       </SidebarMenuButton>
-                      {expandedItems.includes(item.title) && (
-                        <div className="ml-4 mt-1 space-y-1">
-                          {item.items.map((subItem) => (
-                            <SidebarMenuItem key={subItem.title}>
-                              <SidebarMenuButton
-                                asChild
-                                isActive={pathname === subItem.url}
-                              >
-                                <a href={subItem.url}>{subItem.title}</a>
-                              </SidebarMenuButton>
-                            </SidebarMenuItem>
-                          ))}
-                        </div>
-                      )}
                     </SidebarMenuItem>
                   ) : (
                     <SidebarMenuItem>
