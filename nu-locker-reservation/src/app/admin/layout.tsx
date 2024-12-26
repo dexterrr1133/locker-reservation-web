@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AppSidebar } from "@/components/features/app-sidebar";
+import { AppSidebar } from "@/components/features/admin-app-sidebar";
 import Nav from "@/components/features/admin_navbar";
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { Toaster } from "@/components/ui/toaster";
