@@ -20,20 +20,25 @@ const MediumLockersCrud: FC = () => {
     id: string;
     color: string;
     status: LockerStatus;
+    size: string;
     price: number;
-    lastUpdated: string;
+    owner: string | null;
+    reservedAt: string | null;
+    reservedUntil: string | null;
   }
 
   interface FirestoreLockerData {
     status: LockerStatus;
     price: number;
-    lastUpdated: string;
+    owner: string | null;
+    reservedAt: string | null;
+    reservedUntil: string | null;
   }
 
   const [lockers, setLockers] = useState<LockerData[][]>([]);
   const [selectedLocker, setSelectedLocker] = useState<LockerData | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isAddOpen, setIsAddOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -79,14 +84,17 @@ const MediumLockersCrud: FC = () => {
         Array(config.cols).fill(null).map((_, colIndex) => ({
           color: '#ffffff',
           id: `Medium-${rowIndex}-${colIndex}`,
+          size: 'medium',
           status: 'available' as LockerStatus,
-          price: 35.00, // Different default price for medium lockers
-          lastUpdated: new Date().toISOString()
+          price: 300.00,
+          owner: null,
+          reservedAt: null,
+          reservedUntil: null
         }))
       );
 
       try {
-        const lockersCollection = collection(db, 'lockers');
+        const lockersCollection = collection(db, 'locker');
         const lockersSnapshot = await getDocs(lockersCollection);
 
         lockersSnapshot.forEach((doc) => {
@@ -95,9 +103,12 @@ const MediumLockersCrud: FC = () => {
           if (initialLockers[row] && initialLockers[row][col]) {
             initialLockers[row][col] = {
               ...initialLockers[row][col],
+              size: 'medium',
               status: data.status || 'available',
-              price: data.price || 35.00,
-              lastUpdated: data.lastUpdated || new Date().toISOString()
+              price: data.price || 300.00,
+              owner:  null,
+              reservedAt:  null,
+              reservedUntil:  null
             };
           }
         });
@@ -117,53 +128,64 @@ const MediumLockersCrud: FC = () => {
     setIsDetailsOpen(true);
   };
 
-  const updateLocker = async (rowIndex: number, colIndex: number, updateData: Partial<FirestoreLockerData>) => {
+  const addLocker = async (rowIndex: number, colIndex: number, lockerData: Partial<FirestoreLockerData>) => {
     const lockerId = `Medium-${rowIndex}-${colIndex}`;
 
     try {
-      const lockerRef = doc(db, 'lockers', lockerId);
-      const updatedData = {
-        ...updateData,
-        lastUpdated: new Date().toISOString()
-      };
-
-      await setDoc(lockerRef, updatedData, { merge: true });
+      const lockerRef = doc(db, 'locker', lockerId);
+      await setDoc(lockerRef, {
+        ...lockerData,
+        size: 'medium',
+        owner: null,
+        reservedAt: null,
+        reservedUntil: null
+      }, { merge: true });
 
       setLockers(prev => {
         const newLockers = prev.map(row => [...row]);
         newLockers[rowIndex][colIndex] = {
           ...newLockers[rowIndex][colIndex],
-          ...updatedData
+          ...lockerData,
+          owner: null,
+          reservedAt: null,
+          reservedUntil: null
         };
         return newLockers;
       });
 
-      setSelectedLocker(prev => prev ? { ...prev, ...updatedData } : null);
+      setSelectedLocker(prev => prev ? {
+        ...prev,
+        ...lockerData,
+        owner: null,
+        reservedAt: null,
+        reservedUntil: null
+      } : null);
+      
       return true;
     } catch (error) {
-      console.error('Error updating locker:', error);
+      console.error('Error adding locker:', error);
       return false;
     }
   };
 
-  const handleEditSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleAddSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!selectedLocker) return;
 
     const formData = new FormData(event.currentTarget);
-    const updateData: Partial<FirestoreLockerData> = {
+    const lockerData: Partial<FirestoreLockerData> = {
       status: formData.get('status') as LockerStatus,
       price: parseFloat(formData.get('price') as string),
     };
 
     const [row, col] = selectedLocker.id.split('-').slice(1).map(Number);
-    const success = await updateLocker(row, col, updateData);
+    const success = await addLocker(row, col, lockerData);
     
     if (success) {
-      setIsEditOpen(false);
+      setIsAddOpen(false);
     } else {
-      console.error('Failed to update locker');
+      console.error('Failed to add locker');
     }
   };
 
@@ -183,10 +205,10 @@ const MediumLockersCrud: FC = () => {
                 >
                   <Card className="absolute inset-0 flex flex-col items-center justify-center">
                     {getStatusIcon(locker.status)}
-                    <span className="mt-2 text-sm">
+                    <span className="mt-1 text-xs">
                       {`${colIndex + 1}${String.fromCharCode(65 + rowIndex)}`}
                     </span>
-                    <span className="mt-1 text-xs font-medium">
+                    <span className="text-xs font-medium">
                       ${locker.price}
                     </span>
                   </Card>
@@ -217,22 +239,28 @@ const MediumLockersCrud: FC = () => {
               <span className="font-medium capitalize">{selectedLocker.status}</span>
             </div>
             <p>Price: ${selectedLocker.price.toFixed(2)}</p>
-            <p>Last Updated: {new Date(selectedLocker.lastUpdated).toLocaleDateString()}</p>
+            <p>Owner: {selectedLocker.owner || 'None'}</p>
+            {selectedLocker.reservedAt && (
+              <p>Reserved At: {new Date(selectedLocker.reservedAt).toLocaleDateString()}</p>
+            )}
+            {selectedLocker.reservedUntil && (
+              <p>Reserved Until: {new Date(selectedLocker.reservedUntil).toLocaleDateString()}</p>
+            )}
           </div>
 
           <button
             className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-            onClick={() => setIsEditOpen(true)}
+            onClick={() => setIsAddOpen(true)}
           >
-            Edit Locker
+            Add Locker
           </button>
         </Card>
       )}
 
-      {isEditOpen && (
+      {isAddOpen && (
         <Card className="p-6">
-          <form onSubmit={handleEditSubmit}>
-            <h3 className="text-xl font-semibold mb-4">Edit Locker Status</h3>
+          <form onSubmit={handleAddSubmit}>
+            <h3 className="text-xl font-semibold mb-4">Add Locker</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium">Status</label>
@@ -264,7 +292,7 @@ const MediumLockersCrud: FC = () => {
               <button
                 type="button"
                 className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
-                onClick={() => setIsEditOpen(false)}
+                onClick={() => setIsAddOpen(false)}
               >
                 Cancel
               </button>
@@ -272,7 +300,7 @@ const MediumLockersCrud: FC = () => {
                 type="submit"
                 className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
               >
-                Update
+                Add
               </button>
             </div>
           </form>

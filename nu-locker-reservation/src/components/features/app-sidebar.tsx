@@ -39,6 +39,7 @@ const data = {
     {
       title: 'Lockers',
       items: [
+        { title: 'Dashboard', url: '/admin/lockers/locker-dashboard' },
         { title: 'Small Lockers', url: '/admin/lockers/small-lockers' },
         { title: 'Medium Lockers', url: '/admin/lockers/medium-lockers' },
         { title: 'Large Lockers', url: '/admin/lockers/large-lockers' },
