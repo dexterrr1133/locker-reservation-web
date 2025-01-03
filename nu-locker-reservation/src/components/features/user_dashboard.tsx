@@ -7,14 +7,27 @@ import {
   Search,
   UserCircle,
   ShieldCheck,
-  Users
+  Users,
+  MoreVertical,
+  Trash,
+  Edit
 } from 'lucide-react';
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+
 import { 
   collection, 
   getDocs, 
   query, 
   orderBy,
   updateDoc,
+  deleteDoc,
   doc,
 } from 'firebase/firestore';
 import { db } from '@/services/firebase';
@@ -82,6 +95,15 @@ const UsersDashboard: FC = () => {
       setError(err instanceof Error ? err.message : 'An error occurred while fetching users');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await deleteDoc(doc(db, 'users', userId));
+      setUsers(users.filter(user => user.id !== userId));
+    } catch (err) {
+      setError('Failed to delete user');
     }
   };
 
@@ -240,12 +262,12 @@ const UsersDashboard: FC = () => {
                 <th className="text-left p-2">Name</th>
                 <th className="text-left p-2">Email</th>
                 <th className="text-left p-2">Role</th>
-                <th className="text-left p-2">Actions</th>
+                <th className="text-right p-2">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="border-b hover:bg-gray-50">
+                <tr key={user.id} className="border-b hover:bg-gray-10">
                   <td className="p-2">{user.name}</td>
                   <td className="p-2">{user.email}</td>
                   <td className="p-2">
@@ -254,15 +276,25 @@ const UsersDashboard: FC = () => {
                       <span className="capitalize">{user.role}</span>
                     </div>
                   </td>
-                  <td className="p-2">
-                    <select
-                      className="border rounded p-1"
-                      value={user.role}
-                      onChange={(e) => handleRoleChange(user.id, e.target.value as 'admin' | 'user')}
-                    >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
-                    </select>
+                  <td className="p-2 text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="p-2 hover:bg-gray-50 rounded-full">
+                        <MoreVertical className="h-4 w-4" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleRoleChange(user.id, user.role === 'admin' ? 'user' : 'admin')}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Change Role
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="text-red-600"
+                          onClick={() => handleDeleteUser(user.id)}
+                        >
+                          <Trash className="mr-2 h-4 w-4" />
+                          Delete User
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))}

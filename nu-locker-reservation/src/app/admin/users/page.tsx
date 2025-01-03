@@ -8,7 +8,6 @@ const Users  = () => {
 
     return(
         <div>
-            
             <UsersDashboard />
         </div>
 
