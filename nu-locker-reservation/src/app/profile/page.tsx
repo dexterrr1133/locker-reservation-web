@@ -3,7 +3,7 @@ import {AppSidebar} from "@/components/features/profile-app-siderbar";
 import Header from "@/components/features/header";
 import ProfileCard from "@/components/features/profilecard";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Sidebar, SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {  SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { auth } from "@/services/firebase";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { onAuthStateChanged } from "firebase/auth";
@@ -55,7 +55,7 @@ const AccountPage = () => {
             </Breadcrumb>
           </div>
         </header>
-        <div className="flex h-full w-full bg-gray-200 border border-red-500">
+        <div className="flex h-full w-full">
         <div className="w-full p-8">
           <ProfileCard userId={userId} /> {/* Pass userId to ProfileCard */}
         </div>

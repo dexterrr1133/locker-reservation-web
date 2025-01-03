@@ -2,14 +2,12 @@
 
 import { FC, useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Lock, User } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { 
   collection,
   getDocs,
   doc,
   setDoc,
-  query,
-  where
 } from 'firebase/firestore';
 import { db } from '@/services/firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -23,26 +21,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
-
-interface LockerOwner {
-  name: string;
-  email: string;
-  startDate: string;
-  endDate: string;
-  size: string;
-}
 
 interface LockerData {
   id: string;
   color: string;
-  owner?: LockerOwner | null;
-  size: string;
-}
-
-interface FirestoreLockerData {
-  owner?: LockerOwner;
+  lockerNumber: string;
+  lockerSize: string;
+  status: string;
+  email?: string;
+  startDate?: string;
+  endDate?: string;
+  userName?: string;
 }
 
 const MediumLockers: FC = () => {
@@ -54,35 +44,31 @@ const MediumLockers: FC = () => {
 
   const [lockers, setLockers] = useState<LockerData[][]>([]);
   const [selectedLocker, setSelectedLocker] = useState<LockerData | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isReserveOpen, setIsReserveOpen] = useState(false);
-  const [userHasReservedLocker, setUserHasReservedLocker] = useState(false);
   const [userEmail, setUserEmail] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const auth = getAuth();
-      // Listen for auth state changes (e.g., user login)
-      const unsubscribe = onAuthStateChanged(auth, (users) => {
-        if (users && users.email) {
-          setUserEmail(users.email || ''); // Ensure email is available
-        } else {
-          // Handle user not authenticated
-          setUserEmail('');
-        }
-        setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (users) => {
+      if (users && users.email) {
+        setUserEmail(users.email || '');
+      } else {
+        setUserEmail('');
+      }
+    });
 
-      // Cleanup the listener on unmount
-      return () => unsubscribe();
-    },);
+    return () => unsubscribe();
+  }, []);
 
-
+  useEffect(() => {
     const fetchLockerData = async () => {
       const initialLockers = Array(config.rows).fill(null).map((_, rowIndex) =>
         Array(config.cols).fill(null).map((_, colIndex) => ({
           color: '#ffffff',
           id: `Medium-${rowIndex}-${colIndex}`,
-          size: 'Medium'
+          lockerNumber: `${colIndex + 1}${String.fromCharCode(65 + rowIndex)}`,
+          lockerSize: 'Medium',
+          status: 'Available',
         }))
       );
 
@@ -91,14 +77,10 @@ const MediumLockers: FC = () => {
         const lockersSnapshot = await getDocs(lockersCollection);
 
         lockersSnapshot.forEach((doc) => {
-          const data = doc.data() as FirestoreLockerData;
-          const [_, row, col] = doc.id.split('-').map(Number);
+          const data = doc.data() as LockerData;
+          const [, row, col] = doc.id.split('-').map(Number);
           if (initialLockers[row] && initialLockers[row][col]) {
-            const updatedLocker: LockerData = {
-              ...initialLockers[row][col],
-              owner: data.owner || null
-            };
-            initialLockers[row][col] = updatedLocker;
+            initialLockers[row][col] = { ...initialLockers[row][col], ...data };
           }
         });
       } catch (error) {
@@ -108,50 +90,35 @@ const MediumLockers: FC = () => {
     };
 
     fetchLockerData();
-  }, []);
+  }, [config.cols, config.rows]);
 
-  // Check if the user has already reserved a locker
-  useEffect(() => {
-    const checkUserReservation = async (email: string) => {
-      try {
-        const q = query(collection(db, 'reservations'), where('owner.email', '==', email));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-          setUserHasReservedLocker(true); // User has already reserved a locker
-        }
-      } catch (error) {
-        console.error('Error checking user reservation:', error);
-      }
-    };
-
-    checkUserReservation(userEmail);
-  }, [userEmail]);
-
-  const handleLockerClick = async (rowIndex: number, colIndex: number) => {
+  const handleLockerClick = (rowIndex: number, colIndex: number) => {
     const locker = lockers[rowIndex][colIndex];
     setSelectedLocker(locker);
-    setIsDetailsOpen(true);
+    if (locker.status !== 'Available') {
+      setIsReserveOpen(false);
+    } else {
+      setIsReserveOpen(true);
+    }
   };
 
-  const assignLocker = async (rowIndex: number, colIndex: number, ownerData: LockerOwner) => {
+  const assignLocker = async (rowIndex: number, colIndex: number, lockerData: Partial<LockerData>) => {
     const lockerId = `Medium-${rowIndex}-${colIndex}`;
 
     try {
       const lockerRef = doc(db, 'reservations', lockerId);
-      await setDoc(lockerRef, {
-        owner: ownerData
-      }, { merge: true });
+      await setDoc(lockerRef, lockerData, { merge: true });
 
       setLockers(prev => {
         const newLockers = prev.map(row => [...row]);
         newLockers[rowIndex][colIndex] = {
           ...newLockers[rowIndex][colIndex],
-          owner: ownerData
+          ...lockerData
         };
         return newLockers;
       });
 
-      setSelectedLocker(prev => prev ? { ...prev, owner: ownerData } : null);
+      setSelectedLocker(prev => prev ? { ...prev, ...lockerData } : null);
 
       return true;
     } catch (error) {
@@ -166,17 +133,19 @@ const MediumLockers: FC = () => {
     if (!selectedLocker) return;
 
     const formData = new FormData(event.currentTarget);
-    const ownerData: LockerOwner = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
+    const lockerData: Partial<LockerData> = {
+      userName: formData.get('userName') as string,
+      lockerNumber: selectedLocker.lockerNumber,
+      lockerSize: selectedLocker.lockerSize,
+      status: 'Pending',
+      email: userEmail,
       startDate: formData.get('startDate') as string,
       endDate: formData.get('endDate') as string,
-      size: "Medium" as string
     };
 
     const [row, col] = selectedLocker.id.split('-').slice(1).map(Number);
 
-    const success = await assignLocker(row, col, ownerData);
+    const success = await assignLocker(row, col, lockerData);
     if (success) {
       setIsReserveOpen(false);
     } else {
@@ -193,117 +162,66 @@ const MediumLockers: FC = () => {
             {lockers.map((row, rowIndex) => (
               <div key={rowIndex} className="flex gap-2">
                 {row.map((locker, colIndex) => (
-                  <Dialog key={locker.id} open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-                    <div
-                      className={`${config.size} relative cursor-pointer border rounded-lg transition-all hover:shadow-lg`}
-                      style={{ backgroundColor: locker.color }}
-                      onClick={() => handleLockerClick(rowIndex, colIndex)}
-                    >
-                      <Card className="absolute inset-0 flex flex-col items-center justify-center">
-                        <Lock className={locker.owner ? "text-green-600" : "text-gray-400"} />
-                        <span className="mt-2 text-sm">
-                          {`${colIndex + 1}${String.fromCharCode(65 + rowIndex)}`}
-                        </span>
-                      </Card>
-                    </div>
-  
-                    {/* Locker Details in Dialog */}
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Locker Details: {locker.id}</DialogTitle>
-                        <DialogDescription>
-                          {locker.owner ? "Reserved Locker Details" : "This locker is currently unassigned."}
-                        </DialogDescription>
-                      </DialogHeader>
-  
-                      {locker.owner ? (
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <User size={20} />
-                            <span className="font-medium">{locker.owner.name}</span>
-                          </div>
-                          <p>Email: {locker.owner.email}</p>
-                          <p>Start Date: {locker.owner.startDate}</p>
-                          <p>End Date: {locker.owner.endDate}</p>
-                        </div>
-                      ) : (
-                        <div className="italic text-gray-600">
-                          This locker is currently unassigned.
-                        </div>
-                      )}
-  
-                      {/* Conditional Reserve Button */}
-                      {locker.owner && locker.owner.email === userEmail ? (
-                        <div className="mt-4 text-green-600">
-                          This is your current locker for the semester.
-                        </div>
-                      ) : (
-                        !locker.owner && !userHasReservedLocker && (
-                          <Button
-                            className="mt-4 bg-blue-600 text-white hover:bg-blue-700"
-                            onClick={() => setIsReserveOpen(true)}
-                          >
-                            Reserve Locker
-                          </Button>
-                        )
-                      )}
-  
-                      {userHasReservedLocker && !locker.owner && (
-                        <div className="mt-4 text-red-500">
-                          You already have a reserved locker.
-                        </div>
-                      )}
-                    </DialogContent>
-                  </Dialog>
+                  <div
+                    key={locker.id}
+                    className={`${config.size} relative cursor-pointer border rounded-lg transition-all hover:shadow-lg`}
+                    style={{
+                      backgroundColor: locker.status === 'Reserved'
+                        ? '#a8d5a8' // Green for Reserved
+                        : locker.status === 'Pending'
+                        ? '#f9e79f' // Yellow for Pending
+                        : '#ffffff', // White for Available
+                    }}
+                    onClick={() => handleLockerClick(rowIndex, colIndex)}
+                  >
+                    <Card className="absolute inset-0 flex flex-col items-center justify-center">
+                      <Lock
+                        className={
+                          locker.status === 'Reserved'
+                            ? 'text-green-600'
+                            : locker.status === 'Pending'
+                            ? 'text-yellow-500'
+                            : 'text-gray-400'
+                        }
+                      />
+                      <span className="mt-2 text-sm">{locker.lockerNumber}</span>
+                    </Card>
+                  </div>
                 ))}
               </div>
             ))}
           </div>
         </Card>
       </div>
-  
-      {/* Reserve Locker Dialog */}
+
       {isReserveOpen && (
         <Dialog open={isReserveOpen} onOpenChange={setIsReserveOpen}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Reserve a Locker</DialogTitle>
               <DialogDescription>
-                Complete the form below. Click reserve when you're done.
+                Complete the form below. Click reserve when you&apos;re done.
               </DialogDescription>
             </DialogHeader>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                // Add logic to handle reservation
-                setIsReserveOpen(false);
-                setUserHasReservedLocker(true);
-              }}
-            >
+            <form onSubmit={handleReserveSubmit}>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">
+                  <Label htmlFor="userName" className="text-right">
                     Name
                   </Label>
-                  <Input id="name" placeholder="Enter your name" className="col-span-3" required />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="email" className="text-right">
-                    Email
-                  </Label>
-                  <Input id="email" type="email" placeholder="Enter your email" className="col-span-3" required />
+                  <Input id="userName" name="userName" placeholder="Enter your name" className="col-span-3" required />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="startDate" className="text-right">
                     Start Date
                   </Label>
-                  <Input id="startDate" type="date" className="col-span-3" required />
+                  <Input id="startDate" name="startDate" type="date" className="col-span-3" required />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="endDate" className="text-right">
                     End Date
                   </Label>
-                  <Input id="endDate" type="date" className="col-span-3" required />
+                  <Input id="endDate" name="endDate" type="date" className="col-span-3" required />
                 </div>
               </div>
               <DialogFooter>

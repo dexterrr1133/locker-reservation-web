@@ -28,7 +28,7 @@ const ProfileCard = ({ userId }: { userId: string }) => {
   };
 
   return (
-    <div className="bg-white h-auto p-8 rounded-lg shadow-md">
+    <div className="h-auto p-8 rounded-lg shadow-md border border-gray-500">
       <div className="flex items-center justify-center mb-6">
         <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-500 flex items-center justify-center">
           <span className="text-white text-2xl">User</span>

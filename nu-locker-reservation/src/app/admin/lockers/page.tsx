@@ -1,6 +1,6 @@
 "use client"
 
-import LockersCrud from "@/components/lockers/lockers_crud";
+import LockersCrud from "@/components/lockers/admin_lockers_crud";
 
 const Lockers = () => {
 

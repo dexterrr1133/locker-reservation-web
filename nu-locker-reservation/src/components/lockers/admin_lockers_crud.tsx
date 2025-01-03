@@ -3,7 +3,7 @@
 import { FC, useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Lock, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
-import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '@/services/firebase';
 
 interface LockerData {

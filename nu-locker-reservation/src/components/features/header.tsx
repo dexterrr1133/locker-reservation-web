@@ -4,11 +4,9 @@ import { useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '@/services/firebase';
 import { Bars3Icon } from '@heroicons/react/24/outline';
-import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import {
   DropdownMenu,
@@ -19,20 +17,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-const lockers = [
-  { name: 'Small Lockers', description: 'Get a better understanding of your traffic', href: "/small_lockers", icon: ChevronDownIcon },
-  { name: 'Medium Lockers', description: 'Speak directly to your customers', href: "/medium_lockers", icon: ChevronDownIcon },
-  { name: 'Tall Lockers', description: 'Your customers’ data will be safe and secure', href: "/tall_lockers", icon: ChevronDownIcon },
-];
-
-const callsToAction = [
-  { name: 'Watch demo', href: '#', icon: PlayCircleIcon },
-  { name: 'Contact sales', href: '#', icon: PhoneIcon },
-];
-
 
 const Header = () => {
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  interface User {
+    email: string | null;
+    // Add other user properties if needed
+  }
+
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const router = useRouter();
@@ -58,8 +50,12 @@ const Header = () => {
       await signOut(auth);
       setCurrentUser(null); // Update state immediately after sign-out
       router.push('/home'); // Redirect to /home after sign-out
-    } catch (err: any) {
-      console.error('Error during sign-out:', err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error('Error during sign-out:', err.message);
+      } else {
+        console.error('Error during sign-out:', err);
+      }
     }
   };
 
@@ -100,7 +96,7 @@ const Header = () => {
             Reservation
           </Link>
           <Link href="/FAQ" className="text-sm font-semibold text-gray-900">
-            FAQ'S
+            FAQ&#39;s
           </Link>
         </div>
 
@@ -128,7 +124,7 @@ const Header = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuLabel>
-                <span className="text-sm font-semibold text-gray-900 pr-4">
+                <span className="text-sm font-semibold pr-4">
                   {currentUser.email}
                 </span>
                 </DropdownMenuLabel>
@@ -172,7 +168,7 @@ const Header = () => {
               Reservation
             </Link>
             <Link href="#" className="text-sm font-semibold text-gray-900">
-              FAQ'S
+              FAQ&#39;s
             </Link>
 
             {currentUser ? (
