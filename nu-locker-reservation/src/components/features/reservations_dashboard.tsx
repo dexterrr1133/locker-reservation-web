@@ -22,14 +22,14 @@ import { db } from '@/services/firebase';
 
 interface Reservation {
   id: string;
-  createdAt: Timestamp;
+
   endDate: Timestamp;
   lockerNumber: string;
   lockerSize: string;
   startDate: Timestamp;
   status: string;
   totalPrice: number;
-  updatedAt: Timestamp;
+
   userName: string;
 }
 
@@ -63,7 +63,7 @@ const ReservationsDashboard: FC = () => {
     try {
       setLoading(true);
       const reservationsRef = collection(db, 'reservations');
-      const q = query(reservationsRef, orderBy('createdAt', 'desc'));
+      const q = query(reservationsRef, orderBy('lockerNumber', 'desc'));
       const querySnapshot = await getDocs(q);
       
       const fetchedReservations: Reservation[] = [];
@@ -281,8 +281,8 @@ const ReservationsDashboard: FC = () => {
                   <td className="p-2">{reservation.userName}</td>
                   <td className="p-2">{reservation.lockerNumber}</td>
                   <td className="p-2 capitalize">{reservation.lockerSize}</td>
-                  <td className="p-2">{reservation.startDate.toDate().toLocaleDateString()}</td>
-                  <td className="p-2">{reservation.endDate.toDate().toLocaleDateString()}</td>
+                  <td className="p-2">{reservation.startDate.toString()}</td>
+                  <td className="p-2">{reservation.endDate.toString()}</td>
                   <td className="p-2">
                     <div className="flex items-center gap-2">
                       {getStatusIcon(reservation.status)}
@@ -290,8 +290,7 @@ const ReservationsDashboard: FC = () => {
                     </div>
                   </td>
                   <td className="p-2">${reservation.totalPrice}</td>
-                  <td className="p-2">{reservation.createdAt.toDate().toLocaleDateString()}</td>
-                  <td className="p-2">{reservation.updatedAt.toDate().toLocaleDateString()}</td>
+                  
                   <td className="p-2">
                     <select
                       className="border rounded p-1"
