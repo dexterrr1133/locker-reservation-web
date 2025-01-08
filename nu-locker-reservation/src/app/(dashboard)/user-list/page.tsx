@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/features/app-sidebar"
+import { AppSidebar } from "@/components/features/admin-app-sidebar"
 import { Chart } from "@/components/features/chart"
 import { ModeToggle } from "@/components/features/toggle-light-dark-mode"
 import Transactions from "@/components/features/transactions"

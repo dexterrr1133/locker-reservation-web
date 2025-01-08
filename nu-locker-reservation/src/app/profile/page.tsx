@@ -1,92 +1,67 @@
 'use client'
-import Header from '@/components/features/header';
-import ProtectedRoutes from '@/components/protectedRoutes';
-import React from "react";
-
-const Sidebar = () => {
-  return (
-    <>
-    <div className="w-1/4 bg-white p-8">
-      <div className="mb-10">
-        <h1 className="text-2xl">Allen Josef</h1>
-        <p className="text-gray-500">rojov@gmail.com</p>
-      </div>
-      <div className="mb-4">
-        <h3 className="text-lg mb-2">My Locker</h3>
-        <h3 className="font-semibold">Account</h3>
-      </div>
-      <h3 className="cursor-pointer text-blue-600 hover:text-blue-800">Log Out</h3>
-    </div>
-    </>
-  );
-};
-
-const ProfileCard = () => {
-  const [name, setName] = React.useState("Allen Josef Rojo");
-  const [email, setEmail] = React.useState("rojov@gmail.com");
-
-  const handleSave = () => {
-    console.log("Saved", { name, email });
-  };
-
-  return (
-    <>
-      <div className="bg-white h-auto p-8 rounded-lg shadow-md">
-      <div className="flex items-center mb-6">
-        <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-500 flex items-center justify-center">
-          <span className="text-white text-2xl">AR</span>
-        </div>
-        <button className="ml-4 text-blue-600 hover:text-blue-800 focus:outline-none">
-          Upload photo
-        </button>
-      </div>
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-1" htmlFor="name">
-          Name
-        </label>
-        <input
-          type="text"
-          id="name"
-          className="w-full h-10 px-4 rounded-lg border-gray-300"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </div>
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-1" htmlFor="email">
-          Email
-        </label>
-        <input
-          type="email"
-          id="email"
-          className="w-full h-10 px-4 rounded-lg border-gray-300"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </div>
-      <div>
-        <button
-          className="py-2 px-8 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none"
-          onClick={handleSave}
-        >
-          Save
-        </button>
-      </div>
-    </div>
-    </>
-  );
-};
+import {AppSidebar} from "@/components/features/profile-app-siderbar";
+import Header from "@/components/features/header";
+import ProfileCard from "@/components/features/profilecard";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import {  SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { auth } from "@/services/firebase";
+import { Separator } from "@radix-ui/react-dropdown-menu";
+import { onAuthStateChanged } from "firebase/auth";
+import { useEffect, useState } from "react";
 
 const AccountPage = () => {
+  const [userId, setUserId] = useState<string | null>(null); // To store the logged-in user's ID
+
+  // Fetch the current user's ID when the component mounts
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid); // If the user is logged in, set the userId
+      } else {
+        setUserId(null); // If no user is logged in, set it to null
+      }
+    });
+
+    // Cleanup the subscription when the component unmounts
+    return () => unsubscribe();
+  }, []);
+
+  if (!userId) {
+    return <div>Please log in to view your account.</div>; // Display a message if the user is not logged in
+  }
+
   return (
     <>
-      <Header />
-      <div className="flex h-screen bg-gray-200">
-        <Sidebar />
-        <div className="w-3/4 p-8">
-          <ProfileCard />
+    <Header />
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b">
+          <div className="flex items-center gap-2 px-3">
+            <SidebarTrigger />
+            <Separator className="mr-2 h-4 vertical" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="#">
+                    Building Your Application
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </header>
+        <div className="flex h-full w-full">
+        <div className="w-full p-8">
+          <ProfileCard userId={userId} /> {/* Pass userId to ProfileCard */}
         </div>
       </div>
+      </SidebarInset>
+    </SidebarProvider>
     </>
   );
 };
