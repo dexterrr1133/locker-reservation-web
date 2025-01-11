@@ -17,10 +17,13 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { generateUserId } from "@/lib/utils";
 
 
 
 export function SignupForm() {
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -48,15 +51,22 @@ export function SignupForm() {
 
           console.log("User created: ", user.uid);
           console.log("User email: ", user.email);
+
+          const userId = await generateUserId();
+          console.log("Generated USER ID:", userId);
     
           // Save user data to Firestore
-          await setDoc(doc(db, "users", user.uid), {
+          await setDoc(doc(db, "users", userId), {
+            id: userId,
+            uid: user.uid,
+            firstName,
+            lastName,
             email: user.email,
             createdAt: new Date(),
           });
 
           console.log("User data stored in Firestore.");
-          router.push(`/user/${user.uid}`);
+          router.push(`/home`);
     
           setLoading(false);  // End loading state
       // Handle successful signup (optional, redirect or show success message)
@@ -78,6 +88,28 @@ export function SignupForm() {
       </CardHeader>
       <CardContent>
       <form onSubmit={handleSignup} className="grid gap-4">
+      <div className="grid gap-2">
+            <Label htmlFor="firstName">First Name</Label>
+            <Input
+                id="firstName"
+                type="text"
+                placeholder="Hi"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+             />
+        </div>
+        <div className="grid gap-2">
+            <Label htmlFor="email">Last Name</Label>
+            <Input
+                id="lastName"
+                type="text"
+                placeholder="Seulgi"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+             />
+        </div>
         <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input

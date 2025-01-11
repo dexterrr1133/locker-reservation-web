@@ -114,9 +114,12 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader>
       <div className="flex gap-2 py-2 text-sidebar-accent-foreground ">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+        <Link href='/'>
+        <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
             <Company.logo className="size-4" />
           </div>
+
+          </Link>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">{Company.name}</span>
             <span className="truncate text-xs">{Company.plan}</span>

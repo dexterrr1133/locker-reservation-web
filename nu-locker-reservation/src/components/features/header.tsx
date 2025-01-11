@@ -21,6 +21,7 @@ import {
 const Header = () => {
   interface User {
     email: string | null;
+    uid: string;
     // Add other user properties if needed
   }
 
@@ -33,7 +34,10 @@ const Header = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setCurrentUser(user);
+        setCurrentUser({
+          email: user.email,
+          uid: user.uid,
+        });
       } else {
         setCurrentUser(null);
       }
@@ -89,8 +93,8 @@ const Header = () => {
 
         {/* Lockers Dropdown for Desktop */}
         <div className="hidden lg:flex lg:gap-x-12">
-          <Link href="/admin" className="text-sm font-semibold text-gray-900">
-            Admin Dashboard
+          <Link href="/home" className="text-sm font-semibold text-gray-900">
+            Home
           </Link>
           <Link href="/reserve_locker" className="text-sm font-semibold text-gray-900">
             Reservation
@@ -129,7 +133,7 @@ const Header = () => {
                 </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push('/profile')}>
+                <DropdownMenuItem onClick={() => router.push(`/profile/${currentUser.uid}/edit`)}>
                   Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem>
