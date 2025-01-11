@@ -7,6 +7,7 @@ import { auth, db } from "@/services/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 
+
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -17,7 +18,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { generateUserId } from "@/lib/utils";
+
 
 
 
@@ -52,13 +53,9 @@ export function SignupForm() {
           console.log("User created: ", user.uid);
           console.log("User email: ", user.email);
 
-          const userId = await generateUserId();
-          console.log("Generated USER ID:", userId);
     
           // Save user data to Firestore
-          await setDoc(doc(db, "users", userId), {
-            id: userId,
-            uid: user.uid,
+          await setDoc(doc(db, "users", user.uid), {
             firstName,
             lastName,
             email: user.email,
