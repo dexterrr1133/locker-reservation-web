@@ -1,9 +1,9 @@
-import { SignupForm } from "../components/SignupForm";
+import SignupPage from "../components/SignupForm";
 
-export default function SignupPage() {
+export default function Signup() {
   return (
     <div className="max-w-md mx-auto mt-20">
-      <SignupForm />
+      <SignupPage />
     </div>
   );
 }
