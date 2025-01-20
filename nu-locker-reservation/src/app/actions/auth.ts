@@ -1,125 +1,105 @@
-'use server'
-
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, getIdToken } from 'firebase/auth';
-import { adminAuth, adminDb } from '@/services/fireabaseAdmin';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  sendPasswordResetEmail
+} from 'firebase/auth';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/services/firebase';
-import { User } from '../types/user';
+import type { User, SignUpData, SignInData } from '../types/user';
 
-interface SignupData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}
-
-interface SigninData {
-  email: string;
-  password: string;
-}
-
-interface AuthResponse {
-  success: boolean
-  error?: string
-  user?: User
-}
-
-
-export async function SignupUser(data: SignupData): Promise<AuthResponse> {
+export const signUp = async ({ 
+  email, 
+  password, 
+  firstName, 
+  lastName 
+}: SignUpData): Promise<User> => {
   try {
-    // Validate input
-    if (!data.email || !data.password || !data.firstName || !data.lastName) {
-      return {
-        success: false,
-        error: 'All fields are required'
-      }
-    }
+    // Create authentication record
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const { uid } = userCredential.user;
 
-    // Create user with Firebase Admin
-    const userRecord = await adminAuth.createUser({
-      email: data.email,
-      password: data.password,
-      displayName: `${data.firstName} ${data.lastName}`
-    })
+    // Prepare user data
+    const userData: Omit<User, 'uid'> = {
+      email,
+      firstName,
+      lastName,
 
-    const userData: User = {
-      uid: userRecord.uid,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-
-    }
-
+    };
 
     // Store additional user data in Firestore
-    await adminDb.collection('users').doc(userRecord.uid).set(userData)
-    return {
-      success: true,
-      user: userData
-    }
+    await setDoc(doc(db, 'users', uid), userData);
 
+    return {
+      uid,
+      ...userData
+    };
   } catch (error: any) {
-    // Handle specific Firebase Auth errors
-    const errorMessage = (() => {
-      switch (error.code) {
-        case 'auth/email-already-exists':
-          return 'This email is already registered'
-        case 'auth/invalid-email':
-          return 'Invalid email address'
-        case 'auth/operation-not-allowed':
-          return 'Email/password accounts are not enabled'
-        case 'auth/invalid-password':
-          return 'Password should be at least 6 characters'
-        default:
-          return error.message || 'An error occurred during signup'
-      }
-    })()
-
-    return {
-      success: false,
-      error: errorMessage
+    // Handle specific error cases
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        throw new Error('This email is already registered');
+      case 'auth/invalid-email':
+        throw new Error('Invalid email address');
+      case 'auth/weak-password':
+        throw new Error('Password should be at least 6 characters');
+      default:
+        throw new Error('Failed to create account');
     }
   }
-}
+};
 
-export async function SigninUser(data: SigninData): Promise<AuthResponse> {
+export const signIn = async ({ 
+  email, 
+  password 
+}: SignInData): Promise<User> => {
   try {
-    if (!data.email || !data.password) {
-      return {
-        success: false,
-        error: 'Email and password are required'
-      }
+    // Authenticate user
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const { uid } = userCredential.user;
+
+    // Fetch user data from Firestore
+    const userDoc = await getDoc(doc(db, 'users', uid));
+    
+    if (!userDoc.exists()) {
+      throw new Error('User data not found');
     }
 
-    // For login, we use the client-side Firebase Auth
-    const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password)
-    await getIdToken(userCredential.user, true);
-
-    const userDoc = await adminDb.collection('users').doc(userCredential.user.uid).get()
-    const userData = userDoc.data() as User
-
-    return { 
-      success: true,
-      user: userData
-    }
-   
-
+    return {
+      uid,
+      ...userDoc.data()
+    } as User;
   } catch (error: any) {
-    const errorMessage = (() => {
-      switch (error.code) {
-        case 'auth/invalid-email':
-          return 'Invalid email address'
-        case 'auth/user-disabled':
-          return 'This account has been disabled'
-        case 'auth/user-not-found':
-          return 'No account found with this email'
-        case 'auth/wrong-password':
-          return 'Incorrect password'
-        default:
-          return 'Invalid email or password'
-      }
-    })()
-
-    return { success: false, error: errorMessage }
+    // Handle specific error cases
+    switch (error.code) {
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
+        throw new Error('Invalid email or password');
+      case 'auth/too-many-requests':
+        throw new Error('Too many failed attempts. Please try again later');
+      default:
+        throw new Error('Failed to sign in');
+    }
   }
-}
+};
+
+export const signOut = async (): Promise<void> => {
+  try {
+    await firebaseSignOut(auth);
+  } catch (error) {
+    throw new Error('Failed to sign out');
+  }
+};
+
+export const resetPassword = async (email: string): Promise<void> => {
+  try {
+    await sendPasswordResetEmail(auth, email);
+  } catch (error: any) {
+    switch (error.code) {
+      case 'auth/user-not-found':
+        throw new Error('No account found with this email');
+      default:
+        throw new Error('Failed to send password reset email');
+    }
+  }
+};

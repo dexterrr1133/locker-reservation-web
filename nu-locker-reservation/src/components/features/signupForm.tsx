@@ -3,9 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { auth, db } from "@/services/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { signUp } from "@/app/actions/auth";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,54 +17,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function SignupForm() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError('');
+    setLoading(true);
 
-    // Validate passwords match
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
+    const form = event.currentTarget;
+    const formData = {
+      email: form.email.value,
+      password: form.password.value,
+      firstName: form.firstName.value,
+      lastName: form.lastName.value
+    };
 
     try {
-      setLoading(true);
-      // Create user with Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-
-      console.log("User created: ", user.uid);
-      console.log("User email: ", user.email);
-
-      // Save user data to Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        firstName,
-        lastName,
-        email: user.email,
-        uid: user.uid
-      });
-
-      console.log("User data stored in Firestore.");
-      router.push(`/`);
-
-      setLoading(false); // End loading state
-    } catch (err: any) {
-      setLoading(false); // End loading state
-      setError(err.message || "An error occurred during signup.");
-      console.error("Error during signup: ", err.message);
+      await signUp(formData);
+      router.push('/');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -79,15 +53,14 @@ export function SignupForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSignup} className="grid gap-4">
+        <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="firstName">First Name</Label>
             <Input
               id="firstName"
+              name="firstName"
               type="text"
               placeholder="John"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
               required
             />
           </div>
@@ -96,10 +69,9 @@ export function SignupForm() {
             <Label htmlFor="lastName">Last Name</Label>
             <Input
               id="lastName"
+              name="lastName"
               type="text"
               placeholder="Doe"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
               required
             />
           </div>
@@ -108,10 +80,9 @@ export function SignupForm() {
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
+              name="email"
               type="email"
               placeholder="m@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -119,26 +90,12 @@ export function SignupForm() {
           <div className="grid gap-2">
             <div className="flex items-center">
               <Label htmlFor="password">Password</Label>
-              
             </div>
             <Input
               id="password"
+              name="password"
               type="password"
               placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="Re-enter your password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
           </div>
@@ -148,7 +105,7 @@ export function SignupForm() {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Signing Up..." : "Signup"}
           </Button>
-
+          
           <div className="mt-4 text-center text-sm">
             Have an account?{" "}
             <Link href="/login" className="underline">

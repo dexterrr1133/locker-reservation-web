@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/services/firebase";
+import { signIn } from "@/app/actions/auth";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button"
 import {
@@ -17,37 +16,31 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 
 export default function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
- 
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      setError('');
+      setLoading(true);
+  
+      const form = event.currentTarget;
+      const formData = {
+        email: form.email.value,
+        password: form.password.value,
 
-    e.preventDefault();
-    setError("");
-
-    setLoading(true);
-
-    try {
-      // Log in the user using Firebase Authentication
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push("/home");
-
-      // Redirect or show success message
-      console.log("User logged in successfully");
-      
-      
-
-      setLoading(false);
-    } catch (err: any) {
-      setLoading(false);
-      setError(err.message || "An error occurred during login.");
-    }
-  };
+      };
+  
+      try {
+        await signIn(formData);
+        router.push('/');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
 
   return (
     <Card className="mx-auto max-w-sm">
@@ -58,15 +51,15 @@ export default function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-      <form onSubmit={handleLogin} className="grid gap-4">
+      <form onSubmit={handleSubmit} className="grid gap-4">
       <div className="grid gap-2">
         <Label htmlFor="email">Email</Label>
         <Input
           id="email"
+          name="email"
           type="email"
           placeholder="m@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          
           required
         />
       </div>
@@ -80,10 +73,10 @@ export default function LoginForm() {
         </div>
         <Input
           id="password"
+          name="password"
           type="password"
           placeholder="Enter your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+
           required
         />
       </div>
