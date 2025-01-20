@@ -16,35 +16,48 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User } from '@/app/types/user';
-
-interface HeaderProps {
-  currentUser: User | null;
-}
 
 
-const Header = ({ currentUser }: HeaderProps) => {
+const Header = () => {
+  interface User {
+    email: string | null;
+    // Add other user properties if needed
+  }
 
-
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const router = useRouter();
 
   // Listen to user authentication state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+      } else {
+        setCurrentUser(null);
+      }
+      setLoading(false); // Stop loading when authentication state is resolved
+    });
+
+    // Cleanup the listener when the component unmounts
+    return () => unsubscribe();
+  }, []);
 
   // Handle sign-out
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      router.push('/home');
+      setCurrentUser(null); // Update state immediately after sign-out
+      router.push('/home'); // Redirect to /home after sign-out
     } catch (err: unknown) {
-      console.error('Error during sign-out:', err instanceof Error ? err.message : err);
+      if (err instanceof Error) {
+        console.error('Error during sign-out:', err.message);
+      } else {
+        console.error('Error during sign-out:', err);
+      }
     }
   };
-
-  const userInitials = currentUser ? 
-    `${currentUser.firstName?.[0] || ''}${currentUser.lastName?.[0] || ''}` : 
-    'U';
 
   return (
     <header className="bg-white">
@@ -76,8 +89,8 @@ const Header = ({ currentUser }: HeaderProps) => {
 
         {/* Lockers Dropdown for Desktop */}
         <div className="hidden lg:flex lg:gap-x-12">
-          <Link href="/home" className="text-sm font-semibold text-gray-900">
-            Home
+          <Link href="/admin" className="text-sm font-semibold text-gray-900">
+            Admin Dashboard
           </Link>
           <Link href="/reserve_locker" className="text-sm font-semibold text-gray-900">
             Reservation
@@ -104,7 +117,7 @@ const Header = ({ currentUser }: HeaderProps) => {
                 <AvatarFallback
                   className="flex items-center justify-center bg-gray-300 text-black text-lg font-semibold focus:outline-none focus:ring-0 focus-visible:outline-none active:outline-none active:ring-0"
                 >
-                  {userInitials}
+                  CN
                 </AvatarFallback>
               </Avatar>
               </div>
@@ -116,7 +129,7 @@ const Header = ({ currentUser }: HeaderProps) => {
                 </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push(`/profile/${currentUser.uid}/edit`)}>
+                <DropdownMenuItem onClick={() => router.push('/profile')}>
                   Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem>

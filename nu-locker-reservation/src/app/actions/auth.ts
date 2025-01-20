@@ -1,76 +1,125 @@
 'use server'
 
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc, updateDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, getIdToken } from 'firebase/auth';
+import { adminAuth, adminDb } from '@/services/fireabaseAdmin';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '@/services/firebase';
-import { redirect } from 'next/navigation';
+import { User } from '../types/user';
 
-export async function signUp(formData: FormData) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-  const confirmPassword = formData.get('confirmPassword') as string;
-  const firstName = formData.get('firstName') as string;
-  const lastName = formData.get('lastName') as string;
+interface SignupData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
 
-  if (password !== confirmPassword) {
-    throw new Error('Passwords do not match');
-  }
+interface SigninData {
+  email: string;
+  password: string;
+}
 
+interface AuthResponse {
+  success: boolean
+  error?: string
+  user?: User
+}
+
+
+export async function SignupUser(data: SignupData): Promise<AuthResponse> {
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+    // Validate input
+    if (!data.email || !data.password || !data.firstName || !data.lastName) {
+      return {
+        success: false,
+        error: 'All fields are required'
+      }
+    }
 
-    // Add user to Firestore
-    await setDoc(doc(db, 'users', user.uid), {
-      uid: user.uid,
-      email: user.email,
-      firstName,
-      lastName,
-    });
+    // Create user with Firebase Admin
+    const userRecord = await adminAuth.createUser({
+      email: data.email,
+      password: data.password,
+      displayName: `${data.firstName} ${data.lastName}`
+    })
 
-    await updateProfile(user, {
-      displayName: `${firstName} ${lastName}`
-    });
+    const userData: User = {
+      uid: userRecord.uid,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
 
-    redirect('/home');
-  } catch (error) {
-    throw error;
+    }
+
+
+    // Store additional user data in Firestore
+    await adminDb.collection('users').doc(userRecord.uid).set(userData)
+    return {
+      success: true,
+      user: userData
+    }
+
+  } catch (error: any) {
+    // Handle specific Firebase Auth errors
+    const errorMessage = (() => {
+      switch (error.code) {
+        case 'auth/email-already-exists':
+          return 'This email is already registered'
+        case 'auth/invalid-email':
+          return 'Invalid email address'
+        case 'auth/operation-not-allowed':
+          return 'Email/password accounts are not enabled'
+        case 'auth/invalid-password':
+          return 'Password should be at least 6 characters'
+        default:
+          return error.message || 'An error occurred during signup'
+      }
+    })()
+
+    return {
+      success: false,
+      error: errorMessage
+    }
   }
 }
 
-export async function signIn(formData: FormData) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-
+export async function SigninUser(data: SigninData): Promise<AuthResponse> {
   try {
-    await signInWithEmailAndPassword(auth, email, password);
-    redirect('/home');
-  } catch (error) {
-    throw error;
-  }
-}
+    if (!data.email || !data.password) {
+      return {
+        success: false,
+        error: 'Email and password are required'
+      }
+    }
 
-export async function updateUserProfile(formData: FormData) {
-  const firstName = formData.get('firstName') as string;
-  const lastName = formData.get('lastName') as string;
+    // For login, we use the client-side Firebase Auth
+    const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password)
+    await getIdToken(userCredential.user, true);
 
-  if (!auth.currentUser) {
-    throw new Error('No user logged in');
-  }
+    const userDoc = await adminDb.collection('users').doc(userCredential.user.uid).get()
+    const userData = userDoc.data() as User
 
-  try {
-    await updateProfile(auth.currentUser, {
-      displayName: `${firstName} ${lastName}`
-    });
+    return { 
+      success: true,
+      user: userData
+    }
+   
 
-    // Update Firestore
-    await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-      firstName,
-      lastName,
-    });
+  } catch (error: any) {
+    const errorMessage = (() => {
+      switch (error.code) {
+        case 'auth/invalid-email':
+          return 'Invalid email address'
+        case 'auth/user-disabled':
+          return 'This account has been disabled'
+        case 'auth/user-not-found':
+          return 'No account found with this email'
+        case 'auth/wrong-password':
+          return 'Incorrect password'
+        default:
+          return 'Invalid email or password'
+      }
+    })()
 
-    redirect('/home');
-  } catch (error) {
-    throw error;
+    return { success: false, error: errorMessage }
   }
 }

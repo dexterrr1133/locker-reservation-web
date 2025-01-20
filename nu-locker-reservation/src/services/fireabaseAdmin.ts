@@ -1,14 +1,25 @@
-import admin from "firebase-admin";
+// lib/firebase-admin.ts
+import { initializeApp, getApps, cert } from 'firebase-admin/app'
+import { getAuth } from 'firebase-admin/auth'
+import { getFirestore } from 'firebase-admin/firestore'
 
-// Initialize Firebase Admin SDK only once
-if (!admin.apps.length) {
-  const serviceAccount = JSON.parse(
-    process.env.FIREBASE_ADMIN_KEY || "{}"
-  );
+// Initialize Firebase Admin if it hasn't been initialized
+function getFirebaseAdminApp() {
+  const apps = getApps()
+  
+  if (apps.length > 0) {
+    return apps[0]
+  }
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+  return initializeApp({
+    credential: cert({
+      projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n')
+    })
+  })
 }
 
-export const db = admin.firestore();
+const app = getFirebaseAdminApp()
+export const adminAuth = getAuth(app)
+export const adminDb = getFirestore(app)
