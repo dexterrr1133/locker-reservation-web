@@ -31,23 +31,26 @@ export default function FAQPage() {
                 {/* FAQ Items */}
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="item-1">
-                    <AccordionTrigger>Is it accessible?</AccordionTrigger>
+                    <AccordionTrigger>WHO CAN USE THIS SKIBIDI STORAGE?</AccordionTrigger>
                     <AccordionContent>
-                      Yes. It adheres to the WAI-ARIA design pattern.
+                    Only real ones with university ID can participate fr fr (students and teachers) NO NPC ENERGY ALLOWED
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="item-2">
-                    <AccordionTrigger>Is it styled?</AccordionTrigger>
+                    <AccordionTrigger>WHAT'S BANNED FROM THE BACKROOMS? </AccordionTrigger>
                     <AccordionContent>
-                      Yes. It comes with default styles that matches the other
-                      components&apos; aesthetic.
+                    No food (rizz will expire)<br></br>
+                    No crazy chemical stuff (not that kind of breaking bad)<br></br>
+                    No expensive drip (university ain't responsible for stolen grail pieces)<br></br>
+                    Nothing illegal (don't rizz yourself into jail fr fr)
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="item-3">
-                    <AccordionTrigger>Is it animated?</AccordionTrigger>
+                    <AccordionTrigger>WHAT IS THE REFUND POLICY FOR THE PAPER CHASERS 💰</AccordionTrigger>
                     <AccordionContent>
-                      Yes. It&apos;s animated by default, but you can disable it if you
-                      prefer.
+                    First 48 hours: Full refund (zero rizz lost)<br></br>
+                    First two weeks: Half refund (mid rizz energy)<br></br>
+                    After that: No refund (L + ratio)
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>

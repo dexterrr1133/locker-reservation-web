@@ -33,26 +33,26 @@ export default function LockerReservation() {
       {
         title: "Small Locker",
         size: "16\" x 11\"",
-        price: "$500 per AY",
+        price: "₱500 per AY",
         route: "/small_lockers",
         description: "Ideal for compact storage needs",
-        imagePlaceholder: "/small-locker.jpg"
+        imagePlaceholder: "/img/locker_small.png"
       },
       {
         title: "Medium Locker",
         size: "21.5\" x 11\"",
-        price: "$800 per AY",
+        price: "₱800 per AY",
         route: "/medium_lockers",
         description: "Perfect for standard storage requirements",
-        imagePlaceholder: "/medium-locker.jpg"
+        imagePlaceholder: "/img/locker_small.png"
       },
       {
         title: "Tall Locker",
         size: "32\" x 11\"",
-        price: "$1200 per AY",
+        price: "₱1200 per AY",
         route: "/tall_lockers",
         description: "Spacious solution for extensive storage",
-        imagePlaceholder: "/tall-locker.jpg"
+        imagePlaceholder: "/img/locker_small.png"
       }
     ];
   
@@ -86,7 +86,7 @@ export default function LockerReservation() {
             </div>
 
             {/* Locker Options */}
-            <div className="w-full min-h- grid md:grid-cols-3 gap-8">
+            <div className="w-full grid md:grid-cols-3 gap-8">
             {lockerTypes.map((locker, index) => (
               <Card 
                 key={index}
@@ -103,12 +103,15 @@ export default function LockerReservation() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6 pt-4">
-                  <div className="relative w-full aspect-video overflow-hidden rounded-lg">
+                  <div className=" relative w-full max-h-[1920] overflow-hidden rounded-lg">
                     <Image 
                       src={locker.imagePlaceholder} 
                       alt={`${locker.title} visualization`}
-                      fill
+                      width={1080}
+                      height={1920}
+                      
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="w-full h-auto object-contain" // or "object-cover" depending on your preference
                     />
                   </div>
                 </CardContent>

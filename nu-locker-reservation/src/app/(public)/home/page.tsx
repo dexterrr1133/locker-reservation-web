@@ -29,7 +29,7 @@ export default function HomeDashboard() {
     {
       title: "Small Locker",
       size: "16\" x 11\"",
-      price: "$500 per AY",
+      price: "₱500 per AY",
       route: "/small_lockers",
       description: "Ideal for compact storage needs",
       imagePlaceholder: "/img/locker_small.png"
@@ -37,7 +37,7 @@ export default function HomeDashboard() {
     {
       title: "Medium Locker",
       size: "21.5\" x 11\"",
-      price: "$800 per AY",
+      price: "₱800 per AY",
       route: "/medium_lockers",
       description: "Perfect for standard storage requirements",
       imagePlaceholder: "/img/locker_medium.png"
@@ -45,7 +45,7 @@ export default function HomeDashboard() {
     {
       title: "Tall Locker",
       size: "32\" x 11\"",
-      price: "$1200 per AY",
+      price: "₱1200 per AY",
       route: "/tall_lockers",
       description: "Spacious solution for extensive storage",
       imagePlaceholder: "/img/locker_large.png"
