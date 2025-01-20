@@ -21,3 +21,10 @@ export interface SignInData {
   email: string;
   password: string;
 }
+
+export interface UserDocument {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
