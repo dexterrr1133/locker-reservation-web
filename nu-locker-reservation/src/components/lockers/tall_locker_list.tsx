@@ -37,6 +37,14 @@ interface LockerData {
   userName?: string;
 }
 
+interface UserDocument {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+
 const TallLockers: FC = () => {
   const config = {
     rows: 3,
@@ -52,6 +60,7 @@ const TallLockers: FC = () => {
   const [userLocker, setUserLocker] = useState<LockerData | null>(null);
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
   const [refreshLockers, setRefreshLockers] = useState<boolean>(false);
+  const [userData, setUserData] = useState<UserDocument | null>(null);
 
   useEffect(() => {
     const auth = getAuth();
@@ -59,6 +68,7 @@ const TallLockers: FC = () => {
       if (user && user.email) {
         setUserEmail(user.email || '');
         checkUserLockerStatus(user.email);
+        fetchUserData(user.email);
       } else {
         setUserEmail('');
       }
@@ -66,6 +76,19 @@ const TallLockers: FC = () => {
 
     return () => unsubscribe();
   }, []);
+
+  const fetchUserData = async (email: string) => {
+      try {
+        const q = query(collection(db, 'users'), where('email', '==', email));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const userDoc = querySnapshot.docs[0].data() as UserDocument;
+          setUserData(userDoc);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
 
   const checkUserLockerStatus = async (email: string) => {
     try {
@@ -251,13 +274,13 @@ const TallLockers: FC = () => {
                   <Label htmlFor="firstName" className="text-right">
                     First Name
                   </Label>
-                  <Input id="firstName" name="firstName" placeholder="Enter your first name" className="col-span-3" required />
+                  <Input id="firstName" name="firstName" placeholder="Enter your first name" className="col-span-3" defaultValue={userData?.firstName || ''} required />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="lastName" className="text-right">
                     Last Name
                   </Label>
-                  <Input id="lastName" name="lastName" placeholder="Enter your last name" className="col-span-3" required />
+                  <Input id="lastName" name="lastName" placeholder="Enter your last name" className="col-span-3" defaultValue={userData?.lastName || ''} required />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="startDate" className="text-right">
