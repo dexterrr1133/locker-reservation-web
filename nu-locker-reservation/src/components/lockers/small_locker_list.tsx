@@ -46,9 +46,9 @@ interface UserDocument {
 
 const SmallLockers: FC = () => {
   const config = {
-    rows: 3,
+    rows: 4,
     cols: 10,
-    size: 'w-20 h-40'
+    size: 'w-20 h-20'
   };
 
   const [lockers, setLockers] = useState<LockerData[][]>([]);
@@ -237,10 +237,10 @@ const SmallLockers: FC = () => {
                       <Lock
                         className={
                           locker.status === 'Reserved'
-                            ? 'text-green-600'
+                            ? 'text-red-600'
                             : locker.status === 'Pending'
                             ? 'text-yellow-500'
-                            : 'text-gray-400'
+                            : 'text-green-400'
                         }
                       />
                       <span className="mt-2 text-sm">{locker.lockerNumber}</span>
