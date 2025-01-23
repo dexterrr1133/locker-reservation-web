@@ -39,9 +39,9 @@ interface LockerData {
 
 const SmallLockers: FC = () => {
   const config = {
-    rows: 3,
+    rows: 4,
     cols: 10,
-    size: 'w-20 h-40'
+    size: 'w-20 h-20' // Adjusted size for small lockers
   };
 
   const [lockers, setLockers] = useState<LockerData[][]>([]);
@@ -51,6 +51,7 @@ const SmallLockers: FC = () => {
   const [userHasLocker, setUserHasLocker] = useState<boolean>(false);
   const [userLocker, setUserLocker] = useState<LockerData | null>(null);
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
+  const [refreshLockers, setRefreshLockers] = useState<boolean>(false);
 
   useEffect(() => {
     const auth = getAuth();
@@ -68,7 +69,7 @@ const SmallLockers: FC = () => {
 
   const checkUserLockerStatus = async (email: string) => {
     try {
-      const q = query(collection(db, 'reservations'), where('email', '==', email), where('status', 'in', ['Pending', 'Reserved']));
+      const q = query(collection(db, 'reservations'), where('email', '==', email), where('status', 'in', ['Pending', 'Reserved', 'Available']));
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         setUserHasLocker(true);
@@ -96,16 +97,14 @@ const SmallLockers: FC = () => {
 
       try {
         const lockersCollection = collection(db, 'reservations');
-        const lockersSnapshot = await getDocs(lockersCollection);
+        const q = query(lockersCollection, where('lockerSize', '==', 'Small'));
+        const lockersSnapshot = await getDocs(q);
 
         lockersSnapshot.forEach((doc) => {
           const data = doc.data() as LockerData;
-          // Check if the locker is of 'Small' size before assigning it
-          if (data.lockerSize === 'Small') {
-            const [, row, col] = doc.id.split('-').map(Number);
-            if (initialLockers[row] && initialLockers[row][col]) {
-              initialLockers[row][col] = { ...initialLockers[row][col], ...data };
-            }
+          const [, row, col] = doc.id.split('-').map(Number);
+          if (initialLockers[row] && initialLockers[row][col]) {
+            initialLockers[row][col] = { ...initialLockers[row][col], ...data };
           }
         });
       } catch (error) {
@@ -115,7 +114,7 @@ const SmallLockers: FC = () => {
     };
 
     fetchLockerData();
-  }, [config.cols, config.rows]);
+  }, [config.cols, config.rows, refreshLockers]);
 
   const handleLockerClick = (rowIndex: number, colIndex: number) => {
     const locker = lockers[rowIndex][colIndex];
@@ -144,6 +143,7 @@ const SmallLockers: FC = () => {
       });
 
       setSelectedLocker(prev => prev ? { ...prev, ...lockerData } : null);
+      setRefreshLockers(prev => !prev); // Trigger re-fetch of lockers
 
       return true;
     } catch (error) {
@@ -208,6 +208,8 @@ const SmallLockers: FC = () => {
                         ? '#a8d5a8' // Green for Reserved
                         : locker.status === 'Pending'
                         ? '#f9e79f' // Yellow for Pending
+                        : locker.status === 'Completed'
+                        ? '#ff6961' // Red for Completed
                         : '#ffffff', // White for Available
                     }}
                     onClick={() => handleLockerClick(rowIndex, colIndex)}
@@ -216,10 +218,12 @@ const SmallLockers: FC = () => {
                       <Lock
                         className={
                           locker.status === 'Reserved'
-                            ? 'text-green-600'
+                            ? 'text-red-600'
                             : locker.status === 'Pending'
                             ? 'text-yellow-500'
-                            : 'text-gray-400'
+                            : locker.status === 'Completed'
+                            ? 'text-red-600'
+                            : 'text-green-400'
                         }
                       />
                       <span className="mt-2 text-sm">{locker.lockerNumber}</span>

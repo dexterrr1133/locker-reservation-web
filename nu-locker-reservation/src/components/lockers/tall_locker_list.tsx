@@ -37,11 +37,11 @@ interface LockerData {
   userName?: string;
 }
 
-const LargeLockers: FC = () => {
+const TallLockers: FC = () => {
   const config = {
-    rows: 2,
+    rows: 3,
     cols: 10,
-    size: 'w-28 h-64' // Larger dimensions for large lockers
+    size: 'w-20 h-60' // Adjusted size for tall lockers
   };
 
   const [lockers, setLockers] = useState<LockerData[][]>([]);
@@ -51,6 +51,7 @@ const LargeLockers: FC = () => {
   const [userHasLocker, setUserHasLocker] = useState<boolean>(false);
   const [userLocker, setUserLocker] = useState<LockerData | null>(null);
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
+  const [refreshLockers, setRefreshLockers] = useState<boolean>(false);
 
   useEffect(() => {
     const auth = getAuth();
@@ -68,7 +69,7 @@ const LargeLockers: FC = () => {
 
   const checkUserLockerStatus = async (email: string) => {
     try {
-      const q = query(collection(db, 'reservations'), where('email', '==', email), where('status', 'in', ['Pending', 'Reserved']));
+      const q = query(collection(db, 'reservations'), where('email', '==', email), where('status', 'in', ['Pending', 'Reserved', 'Available']));
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         setUserHasLocker(true);
@@ -87,25 +88,23 @@ const LargeLockers: FC = () => {
       const initialLockers = Array(config.rows).fill(null).map((_, rowIndex) =>
         Array(config.cols).fill(null).map((_, colIndex) => ({
           color: '#ffffff',
-          id: `Large-${rowIndex}-${colIndex}`,
+          id: `Tall-${rowIndex}-${colIndex}`,
           lockerNumber: `${colIndex + 1}${String.fromCharCode(65 + rowIndex)}`,
-          lockerSize: 'Large',
+          lockerSize: 'Tall',
           status: 'Available',
         }))
       );
 
       try {
         const lockersCollection = collection(db, 'reservations');
-        const lockersSnapshot = await getDocs(lockersCollection);
+        const q = query(lockersCollection, where('lockerSize', '==', 'Large'));
+        const lockersSnapshot = await getDocs(q);
 
         lockersSnapshot.forEach((doc) => {
           const data = doc.data() as LockerData;
-          // Check if the locker is of 'Large' size before assigning it
-          if (data.lockerSize === 'Large') {
-            const [, row, col] = doc.id.split('-').map(Number);
-            if (initialLockers[row] && initialLockers[row][col]) {
-              initialLockers[row][col] = { ...initialLockers[row][col], ...data };
-            }
+          const [, row, col] = doc.id.split('-').map(Number);
+          if (initialLockers[row] && initialLockers[row][col]) {
+            initialLockers[row][col] = { ...initialLockers[row][col], ...data };
           }
         });
       } catch (error) {
@@ -115,7 +114,7 @@ const LargeLockers: FC = () => {
     };
 
     fetchLockerData();
-  }, [config.cols, config.rows]);
+  }, [config.cols, config.rows, refreshLockers]);
 
   const handleLockerClick = (rowIndex: number, colIndex: number) => {
     const locker = lockers[rowIndex][colIndex];
@@ -128,7 +127,7 @@ const LargeLockers: FC = () => {
   };
 
   const assignLocker = async (rowIndex: number, colIndex: number, lockerData: Partial<LockerData>) => {
-    const lockerId = `Large-${rowIndex}-${colIndex}`;
+    const lockerId = `Tall-${rowIndex}-${colIndex}`;
 
     try {
       const lockerRef = doc(db, 'reservations', lockerId);
@@ -144,6 +143,7 @@ const LargeLockers: FC = () => {
       });
 
       setSelectedLocker(prev => prev ? { ...prev, ...lockerData } : null);
+      setRefreshLockers(prev => !prev); // Trigger re-fetch of lockers
 
       return true;
     } catch (error) {
@@ -195,7 +195,7 @@ const LargeLockers: FC = () => {
     <>
       <div className="min-h-screen flex items-center justify-center">
         <Card className="p-6">
-          <h2 className="text-2xl font-bold mb-4 p-6">Large Lockers</h2> {/* Updated title */}
+          <h2 className="text-2xl font-bold mb-4 p-6">Tall Lockers</h2>
           <div className="grid gap-2 place-items-center">
             {lockers.map((row, rowIndex) => (
               <div key={rowIndex} className="flex gap-2">
@@ -208,6 +208,8 @@ const LargeLockers: FC = () => {
                         ? '#a8d5a8' // Green for Reserved
                         : locker.status === 'Pending'
                         ? '#f9e79f' // Yellow for Pending
+                        : locker.status === 'Completed'
+                        ? '#ff6961' // Red for Completed
                         : '#ffffff', // White for Available
                     }}
                     onClick={() => handleLockerClick(rowIndex, colIndex)}
@@ -216,10 +218,12 @@ const LargeLockers: FC = () => {
                       <Lock
                         className={
                           locker.status === 'Reserved'
-                            ? 'text-green-600'
+                            ? 'text-red-600'
                             : locker.status === 'Pending'
                             ? 'text-yellow-500'
-                            : 'text-gray-400'
+                            : locker.status === 'Completed'
+                            ? 'text-red-600'
+                            : 'text-green-400'
                         }
                       />
                       <span className="mt-2 text-sm">{locker.lockerNumber}</span>
@@ -342,4 +346,4 @@ const LargeLockers: FC = () => {
   );
 };
 
-export default LargeLockers;
+export default TallLockers;

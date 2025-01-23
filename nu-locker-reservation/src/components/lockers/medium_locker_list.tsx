@@ -51,6 +51,7 @@ const MediumLockers: FC = () => {
   const [userHasLocker, setUserHasLocker] = useState<boolean>(false);
   const [userLocker, setUserLocker] = useState<LockerData | null>(null);
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
+  const [refreshLockers, setRefreshLockers] = useState<boolean>(false);
 
   useEffect(() => {
     const auth = getAuth();
@@ -68,7 +69,7 @@ const MediumLockers: FC = () => {
 
   const checkUserLockerStatus = async (email: string) => {
     try {
-      const q = query(collection(db, 'reservations'), where('email', '==', email), where('status', 'in', ['Pending', 'Reserved']));
+      const q = query(collection(db, 'reservations'), where('email', '==', email), where('status', 'in', ['Pending', 'Reserved', 'Available']));
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         setUserHasLocker(true);
@@ -96,7 +97,8 @@ const MediumLockers: FC = () => {
 
       try {
         const lockersCollection = collection(db, 'reservations');
-        const lockersSnapshot = await getDocs(lockersCollection);
+        const q = query(lockersCollection, where('lockerSize', '==', 'Medium'));
+        const lockersSnapshot = await getDocs(q);
 
         lockersSnapshot.forEach((doc) => {
           const data = doc.data() as LockerData;
@@ -112,7 +114,7 @@ const MediumLockers: FC = () => {
     };
 
     fetchLockerData();
-  }, [config.cols, config.rows]);
+  }, [config.cols, config.rows, refreshLockers]);
 
   const handleLockerClick = (rowIndex: number, colIndex: number) => {
     const locker = lockers[rowIndex][colIndex];
@@ -141,6 +143,7 @@ const MediumLockers: FC = () => {
       });
 
       setSelectedLocker(prev => prev ? { ...prev, ...lockerData } : null);
+      setRefreshLockers(prev => !prev); // Trigger re-fetch of lockers
 
       return true;
     } catch (error) {
@@ -205,6 +208,8 @@ const MediumLockers: FC = () => {
                         ? '#a8d5a8' // Green for Reserved
                         : locker.status === 'Pending'
                         ? '#f9e79f' // Yellow for Pending
+                        : locker.status === 'Completed'
+                        ? '#ff6961' // Red for Completed
                         : '#ffffff', // White for Available
                     }}
                     onClick={() => handleLockerClick(rowIndex, colIndex)}
@@ -213,10 +218,12 @@ const MediumLockers: FC = () => {
                       <Lock
                         className={
                           locker.status === 'Reserved'
-                            ? 'text-green-600'
+                            ? 'text-red-600'
                             : locker.status === 'Pending'
                             ? 'text-yellow-500'
-                            : 'text-gray-400'
+                            : locker.status === 'Completed'
+                            ? 'text-red-600'
+                            : 'text-green-400'
                         }
                       />
                       <span className="mt-2 text-sm">{locker.lockerNumber}</span>
