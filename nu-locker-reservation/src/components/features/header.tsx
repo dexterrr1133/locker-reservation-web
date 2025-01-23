@@ -15,8 +15,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-
+} from "@/components/ui/dropdown-menu";
+import { ModeToggle } from "@/components/features/toggle-light-dark-mode";
 
 const Header = () => {
   interface User {
@@ -60,7 +60,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white">
+    <header className="bg-white dark:bg-gray-900 shadow-sm">
       <nav aria-label="Global" className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
         <div className="flex lg:flex-1">
           <Link href="/home" className="-m-1.5 p-1.5">
@@ -80,74 +80,75 @@ const Header = () => {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700 dark:text-gray-200"
+            aria-label="Open main menu"
           >
-            <span className="sr-only">Open main menu</span>
             <Bars3Icon aria-hidden="true" className="size-6" />
           </button>
         </div>
 
         {/* Lockers Dropdown for Desktop */}
         <div className="hidden lg:flex lg:gap-x-12">
-          <Link href="/admin" className="text-sm font-semibold text-gray-900">
+          <Link href="/admin" className="text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300">
             Admin Dashboard
           </Link>
-          <Link href="/reserve_locker" className="text-sm font-semibold text-gray-900">
+          <Link href="/reserve_locker" className="text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300">
             Reservation
           </Link>
-          <Link href="/FAQ" className="text-sm font-semibold text-gray-900">
+          <Link href="/FAQ" className="text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300">
             FAQ&#39;s
           </Link>
         </div>
 
         {/* User Authentication Buttons */}
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-4">
+          <ModeToggle />
           {currentUser ? (
             <>
               <DropdownMenu>
-              <DropdownMenuTrigger>
-              <div className="h-10 flex items-center justify-center ">
-              <Avatar
-                className="w-full h-full rounded-full overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none active:outline-none active:ring-0"
-              >
-                <AvatarImage
-                  src="https://github.com/shadcn.png"
-                  className="w-full h-full object-cover"
-                />
-                <AvatarFallback
-                  className="flex items-center justify-center bg-gray-300 text-black text-lg font-semibold focus:outline-none focus:ring-0 focus-visible:outline-none active:outline-none active:ring-0"
-                >
-                  CN
-                </AvatarFallback>
-              </Avatar>
-              </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>
-                <span className="text-sm font-semibold pr-4">
-                  {currentUser.email}
-                </span>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push('/profile')}>
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                <button
-                  onClick={handleSignOut}
-                >
-                  Sign Out
-                </button>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <DropdownMenuTrigger>
+                  <div className="h-10 flex items-center justify-center">
+                    <Avatar
+                      className="w-full h-full rounded-full overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none active:outline-none active:ring-0"
+                    >
+                      <AvatarImage
+                        src="https://github.com/shadcn.png"
+                        className="w-full h-full object-cover"
+                      />
+                      <AvatarFallback
+                        className="flex items-center justify-center bg-gray-300 text-black text-lg font-semibold focus:outline-none focus:ring-0 focus-visible:outline-none active:outline-none active:ring-0"
+                      >
+                        CN
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>
+                    <span className="text-sm font-semibold pr-4">
+                      {currentUser.email}
+                    </span>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push('/profile')}>
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <button
+                      onClick={handleSignOut}
+                    >
+                      Sign Out
+                    </button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
             <>
-              <Link href="/login" className="text-sm font-semibold text-gray-900 pr-4">
+              <Link href="/login" className="text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300 pr-4">
                 Log in
               </Link>
-              <Link href="/signup" className="text-sm font-semibold text-gray-900">
+              <Link href="/signup" className="text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300">
                 Signup
               </Link>
             </>
@@ -155,40 +156,38 @@ const Header = () => {
         </div>
       </nav>
 
-      
-
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden">
-          <div className="space-y-4 p-4">
-            <Link href="/admin" className="text-sm font-semibold text-gray-900">
+        <div className="lg:hidden bg-white dark:bg-gray-900 p-4">
+          <div className="space-y-4">
+            <Link href="/admin" className="block text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300">
               Admin Dashboard
             </Link>
-            <Link href="/reserve_locker" className="text-sm font-semibold text-gray-900">
+            <Link href="/reserve_locker" className="block text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300">
               Reservation
             </Link>
-            <Link href="#" className="text-sm font-semibold text-gray-900">
+            <Link href="/FAQ" className="block text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300">
               FAQ&#39;s
             </Link>
 
             {currentUser ? (
               <>
-                <span className="text-sm font-semibold text-gray-900 pr-4">
+                <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100">
                   {currentUser.email}
                 </span>
                 <button
                   onClick={handleSignOut}
-                  className="text-sm font-semibold text-gray-900"
+                  className="block text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300"
                 >
                   Sign Out
                 </button>
               </>
             ) : (
               <>
-                <Link href="/login" className="text-sm font-semibold text-gray-900 pr-4">
+                <Link href="/login" className="block text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300">
                   Log in
                 </Link>
-                <Link href="/signup" className="text-sm font-semibold text-gray-900">
+                <Link href="/signup" className="block text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300">
                   Signup
                 </Link>
               </>

@@ -18,12 +18,12 @@ import { Label } from "@/components/ui/label";
 
 export function SignupForm() {
   const router = useRouter();
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     const form = event.currentTarget;
@@ -31,14 +31,21 @@ export function SignupForm() {
       email: form.email.value,
       password: form.password.value,
       firstName: form.firstName.value,
-      lastName: form.lastName.value
+      lastName: form.lastName.value,
     };
 
     try {
-      await signUp(formData);
-      router.push('/');
+      const response = await signUp(formData);
+
+      if (response.success) {
+        // Redirect to home page on successful signup
+        router.push("/");
+      } else {
+        // Display error message if signup fails
+        setError(response.error || "An error occurred");
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -105,7 +112,7 @@ export function SignupForm() {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Signing Up..." : "Signup"}
           </Button>
-          
+
           <div className="mt-4 text-center text-sm">
             Have an account?{" "}
             <Link href="/login" className="underline">

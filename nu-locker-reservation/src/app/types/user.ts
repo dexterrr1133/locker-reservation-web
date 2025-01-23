@@ -4,7 +4,8 @@ export interface User {
   lastName: string;
   email: string;
 
-}export interface AuthResponse {
+}
+export interface AuthResponse {
   success: boolean;
   error?: string;
   user?: User;
