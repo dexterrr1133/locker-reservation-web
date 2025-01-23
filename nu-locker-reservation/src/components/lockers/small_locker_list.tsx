@@ -37,6 +37,13 @@ interface LockerData {
   userName?: string;
 }
 
+interface UserDocument {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 const SmallLockers: FC = () => {
   const config = {
     rows: 3,
@@ -51,20 +58,36 @@ const SmallLockers: FC = () => {
   const [userHasLocker, setUserHasLocker] = useState<boolean>(false);
   const [userLocker, setUserLocker] = useState<LockerData | null>(null);
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
+  const [userData, setUserData] = useState<UserDocument | null>(null);
 
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user && user.email) {
         setUserEmail(user.email || '');
         checkUserLockerStatus(user.email);
+        fetchUserData(user.email);
       } else {
         setUserEmail('');
+        setUserData(null);
       }
     });
 
     return () => unsubscribe();
   }, []);
+
+  const fetchUserData = async (email: string) => {
+    try {
+      const q = query(collection(db, 'users'), where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0].data() as UserDocument;
+        setUserData(userDoc);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
   const checkUserLockerStatus = async (email: string) => {
     try {
@@ -100,7 +123,6 @@ const SmallLockers: FC = () => {
 
         lockersSnapshot.forEach((doc) => {
           const data = doc.data() as LockerData;
-          // Check if the locker is of 'Small' size before assigning it
           if (data.lockerSize === 'Small') {
             const [, row, col] = doc.id.split('-').map(Number);
             if (initialLockers[row] && initialLockers[row][col]) {
@@ -161,7 +183,6 @@ const SmallLockers: FC = () => {
     const startDate = formData.get('startDate') as string;
     const endDate = formData.get('endDate') as string;
 
-    // Validate dates
     if (new Date(endDate) <= new Date(startDate)) {
       setIsErrorDialogOpen(true);
       return;
@@ -247,13 +268,27 @@ const SmallLockers: FC = () => {
                   <Label htmlFor="firstName" className="text-right">
                     First Name
                   </Label>
-                  <Input id="firstName" name="firstName" placeholder="Enter your first name" className="col-span-3" required />
+                  <Input 
+                    id="firstName" 
+                    name="firstName" 
+                    placeholder="Enter your first name" 
+                    className="col-span-3" 
+                    required 
+                    defaultValue={userData?.firstName || ''}
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="lastName" className="text-right">
                     Last Name
                   </Label>
-                  <Input id="lastName" name="lastName" placeholder="Enter your last name" className="col-span-3" required />
+                  <Input 
+                    id="lastName" 
+                    name="lastName" 
+                    placeholder="Enter your last name" 
+                    className="col-span-3" 
+                    required 
+                    defaultValue={userData?.lastName || ''}
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="startDate" className="text-right">
