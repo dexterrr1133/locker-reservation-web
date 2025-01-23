@@ -120,7 +120,7 @@ const TallLockers: FC = () => {
 
       try {
         const lockersCollection = collection(db, 'reservations');
-        const q = query(lockersCollection, where('lockerSize', '==', 'Large'));
+        const q = query(lockersCollection, where('lockerSize', '==', 'Tall'));
         const lockersSnapshot = await getDocs(q);
 
         lockersSnapshot.forEach((doc) => {
@@ -150,7 +150,7 @@ const TallLockers: FC = () => {
   };
 
   const assignLocker = async (rowIndex: number, colIndex: number, lockerData: Partial<LockerData>) => {
-    const lockerId = `Tall-${rowIndex}-${colIndex}`;
+    const lockerId = `Large-${rowIndex}-${colIndex}`;
 
     try {
       const lockerRef = doc(db, 'reservations', lockerId);
