@@ -31,26 +31,27 @@ export default function FAQPage() {
                 {/* FAQ Items */}
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="item-1">
-                    <AccordionTrigger>WHO CAN USE THIS SKIBIDI STORAGE?</AccordionTrigger>
+                    <AccordionTrigger>How do I reserve a locker?</AccordionTrigger>
                     <AccordionContent>
-                    Only real ones with university ID can participate fr fr (students and teachers) NO NPC ENERGY ALLOWED
+                    To reserve a locker, log in to your account, browse the available lockers, and click the "Reserve" button for your preferred locker.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="item-2">
-                    <AccordionTrigger>WHAT'S BANNED FROM THE BACKROOMS? </AccordionTrigger>
+                    <AccordionTrigger>How long is the reservation valid?</AccordionTrigger>
                     <AccordionContent>
-                    No food (rizz will expire)<br></br>
-                    No crazy chemical stuff (not that kind of breaking bad)<br></br>
-                    No expensive drip (university ain't responsible for stolen grail pieces)<br></br>
-                    Nothing illegal (don't rizz yourself into jail fr fr)
+                    Lockers can be reserved for one semester at a time. At the end of the semester, you will need to renew your reservation.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="item-3">
-                    <AccordionTrigger>WHAT IS THE REFUND POLICY FOR THE PAPER CHASERS 💰</AccordionTrigger>
+                    <AccordionTrigger>Are there any items I’m not allowed to store in the locker?</AccordionTrigger>
                     <AccordionContent>
-                    First 48 hours: Full refund (zero rizz lost)<br></br>
-                    First two weeks: Half refund (mid rizz energy)<br></br>
-                    After that: No refund (L + ratio)
+                    Yes, you are not allowed to store prohibited items such as hazardous materials, illegal substances, or perishable food.
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="item-4">
+                    <AccordionTrigger>Are there any items I’m not allowed to store in the locker?</AccordionTrigger>
+                    <AccordionContent>
+                    Yes, you are not allowed to store prohibited items such as hazardous materials, illegal substances, or perishable food.
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
