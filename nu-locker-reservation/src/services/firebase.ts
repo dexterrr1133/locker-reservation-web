@@ -1,7 +1,7 @@
 
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { browserSessionPersistence, getAuth, onAuthStateChanged, setPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -25,5 +25,8 @@ if (typeof window !== "undefined") {
 }
 
 export { analytics };
+
+setPersistence(auth, browserSessionPersistence);
+
 
 

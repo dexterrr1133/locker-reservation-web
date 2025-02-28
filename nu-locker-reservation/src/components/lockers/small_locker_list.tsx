@@ -8,6 +8,8 @@ import {
   getDocs,
   doc,
   setDoc,
+  query,
+  where
 } from 'firebase/firestore';
 import { db } from '@/services/firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -35,30 +37,73 @@ interface LockerData {
   userName?: string;
 }
 
+interface UserDocument {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 const SmallLockers: FC = () => {
   const config = {
     rows: 4,
     cols: 10,
-    size: 'w-20 h-20' // Smaller dimensions for small lockers
+    size: 'w-20 h-20'
   };
 
   const [lockers, setLockers] = useState<LockerData[][]>([]);
   const [selectedLocker, setSelectedLocker] = useState<LockerData | null>(null);
   const [isReserveOpen, setIsReserveOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string>('');
+  const [userHasLocker, setUserHasLocker] = useState<boolean>(false);
+  const [userLocker, setUserLocker] = useState<LockerData | null>(null);
+  const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
+  const [userData, setUserData] = useState<UserDocument | null>(null);
 
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (users) => {
-      if (users && users.email) {
-        setUserEmail(users.email || '');
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user && user.email) {
+        setUserEmail(user.email || '');
+        checkUserLockerStatus(user.email);
+        fetchUserData(user.email);
       } else {
         setUserEmail('');
+        setUserData(null);
       }
     });
 
     return () => unsubscribe();
   }, []);
+
+  const fetchUserData = async (email: string) => {
+    try {
+      const q = query(collection(db, 'users'), where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0].data() as UserDocument;
+        setUserData(userDoc);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  const checkUserLockerStatus = async (email: string) => {
+    try {
+      const q = query(collection(db, 'reservations'), where('email', '==', email), where('status', 'in', ['Pending', 'Reserved']));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        setUserHasLocker(true);
+        setUserLocker(querySnapshot.docs[0].data() as LockerData);
+      } else {
+        setUserHasLocker(false);
+        setUserLocker(null);
+      }
+    } catch (error) {
+      console.error('Error checking user locker status:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchLockerData = async () => {
@@ -71,14 +116,13 @@ const SmallLockers: FC = () => {
           status: 'Available',
         }))
       );
-  
+
       try {
         const lockersCollection = collection(db, 'reservations');
         const lockersSnapshot = await getDocs(lockersCollection);
-  
+
         lockersSnapshot.forEach((doc) => {
           const data = doc.data() as LockerData;
-          // Check if the locker is of 'Small' size before assigning it
           if (data.lockerSize === 'Small') {
             const [, row, col] = doc.id.split('-').map(Number);
             if (initialLockers[row] && initialLockers[row][col]) {
@@ -91,17 +135,17 @@ const SmallLockers: FC = () => {
       }
       setLockers(initialLockers);
     };
-  
+
     fetchLockerData();
   }, [config.cols, config.rows]);
 
   const handleLockerClick = (rowIndex: number, colIndex: number) => {
     const locker = lockers[rowIndex][colIndex];
     setSelectedLocker(locker);
-    if (locker.status !== 'Available') {
+    if (userHasLocker) {
       setIsReserveOpen(false);
     } else {
-      setIsReserveOpen(true);
+      setIsReserveOpen(locker.status === 'Available');
     }
   };
 
@@ -136,14 +180,26 @@ const SmallLockers: FC = () => {
     if (!selectedLocker) return;
 
     const formData = new FormData(event.currentTarget);
+    const startDate = formData.get('startDate') as string;
+    const endDate = formData.get('endDate') as string;
+
+    if (new Date(endDate) <= new Date(startDate)) {
+      setIsErrorDialogOpen(true);
+      return;
+    }
+
+    const firstName = formData.get('firstName') as string;
+    const lastName = formData.get('lastName') as string;
+    const userName = `${firstName} ${lastName}`;
+
     const lockerData: Partial<LockerData> = {
-      userName: formData.get('userName') as string,
+      userName,
       lockerNumber: selectedLocker.lockerNumber,
       lockerSize: selectedLocker.lockerSize,
       status: 'Pending',
       email: userEmail,
-      startDate: formData.get('startDate') as string,
-      endDate: formData.get('endDate') as string,
+      startDate,
+      endDate,
     };
 
     const [row, col] = selectedLocker.id.split('-').slice(1).map(Number);
@@ -160,7 +216,7 @@ const SmallLockers: FC = () => {
     <>
       <div className="min-h-screen flex items-center justify-center">
         <Card className="p-6">
-          <h2 className="text-2xl font-bold mb-4 p-6">Small Lockers</h2> {/* Updated title */}
+          <h2 className="text-2xl font-bold mb-4 p-6">Small Lockers</h2>
           <div className="grid gap-2 place-items-center">
             {lockers.map((row, rowIndex) => (
               <div key={rowIndex} className="flex gap-2">
@@ -181,10 +237,10 @@ const SmallLockers: FC = () => {
                       <Lock
                         className={
                           locker.status === 'Reserved'
-                            ? 'text-green-600'
+                            ? 'text-red-600'
                             : locker.status === 'Pending'
                             ? 'text-yellow-500'
-                            : 'text-gray-400'
+                            : 'text-green-400'
                         }
                       />
                       <span className="mt-2 text-sm">{locker.lockerNumber}</span>
@@ -197,7 +253,7 @@ const SmallLockers: FC = () => {
         </Card>
       </div>
 
-      {isReserveOpen && (
+      {isReserveOpen && !userHasLocker && (
         <Dialog open={isReserveOpen} onOpenChange={setIsReserveOpen}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
@@ -209,10 +265,30 @@ const SmallLockers: FC = () => {
             <form onSubmit={handleReserveSubmit}>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="userName" className="text-right">
-                    Name
+                  <Label htmlFor="firstName" className="text-right">
+                    First Name
                   </Label>
-                  <Input id="userName" name="userName" placeholder="Enter your name" className="col-span-3" required />
+                  <Input 
+                    id="firstName" 
+                    name="firstName" 
+                    placeholder="Enter your first name" 
+                    className="col-span-3" 
+                    required 
+                    defaultValue={userData?.firstName || ''}
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="lastName" className="text-right">
+                    Last Name
+                  </Label>
+                  <Input 
+                    id="lastName" 
+                    name="lastName" 
+                    placeholder="Enter your last name" 
+                    className="col-span-3" 
+                    required 
+                    defaultValue={userData?.lastName || ''}
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="startDate" className="text-right">
@@ -236,6 +312,64 @@ const SmallLockers: FC = () => {
                 </Button>
               </DialogFooter>
             </form>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {userHasLocker && userLocker && (
+        <Dialog open={!isReserveOpen} onOpenChange={() => setIsReserveOpen(false)}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Your Reserved Locker</DialogTitle>
+              <DialogDescription>
+                Here are the details of your reserved locker.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Locker Number</Label>
+                <div className="col-span-3">{userLocker.lockerNumber}</div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Locker Size</Label>
+                <div className="col-span-3">{userLocker.lockerSize}</div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Status</Label>
+                <div className="col-span-3">{userLocker.status}</div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Start Date</Label>
+                <div className="col-span-3">{userLocker.startDate}</div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">End Date</Label>
+                <div className="col-span-3">{userLocker.endDate}</div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setIsReserveOpen(true)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {isErrorDialogOpen && (
+        <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Error</DialogTitle>
+              <DialogDescription>
+                The end date must be after the start date.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setIsErrorDialogOpen(false)}>
+                Close
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}

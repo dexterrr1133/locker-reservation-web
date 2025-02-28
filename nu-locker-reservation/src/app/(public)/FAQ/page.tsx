@@ -31,23 +31,27 @@ export default function FAQPage() {
                 {/* FAQ Items */}
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="item-1">
-                    <AccordionTrigger>Is it accessible?</AccordionTrigger>
+                    <AccordionTrigger>How do I reserve a locker?</AccordionTrigger>
                     <AccordionContent>
-                      Yes. It adheres to the WAI-ARIA design pattern.
+                    To reserve a locker, log in to your account, browse the available lockers, and click the "Reserve" button for your preferred locker.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="item-2">
-                    <AccordionTrigger>Is it styled?</AccordionTrigger>
+                    <AccordionTrigger>How long is the reservation valid?</AccordionTrigger>
                     <AccordionContent>
-                      Yes. It comes with default styles that matches the other
-                      components&apos; aesthetic.
+                    Lockers can be reserved for one semester at a time. At the end of the semester, you will need to renew your reservation.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="item-3">
-                    <AccordionTrigger>Is it animated?</AccordionTrigger>
+                    <AccordionTrigger>Are there any items I’m not allowed to store in the locker?</AccordionTrigger>
                     <AccordionContent>
-                      Yes. It&apos;s animated by default, but you can disable it if you
-                      prefer.
+                    Yes, you are not allowed to store prohibited items such as hazardous materials, illegal substances, or perishable food.
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="item-4">
+                    <AccordionTrigger>Are there any items I’m not allowed to store in the locker?</AccordionTrigger>
+                    <AccordionContent>
+                    Yes, you are not allowed to store prohibited items such as hazardous materials, illegal substances, or perishable food.
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
